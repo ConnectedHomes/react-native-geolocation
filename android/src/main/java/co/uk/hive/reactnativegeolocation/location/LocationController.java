@@ -4,18 +4,26 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Looper;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
+
 import com.annimon.stream.Stream;
 import com.annimon.stream.function.Function;
-import com.google.android.gms.location.*;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 
 public class LocationController {
     private final Context mContext;
     private final FusedLocationProviderClient mLocationClient;
 
     public LocationController(Context context) {
-        this.mContext = context;
+        mContext = context;
         mLocationClient = LocationServices.getFusedLocationProviderClient(context);
     }
 
@@ -30,6 +38,11 @@ public class LocationController {
 
         if (!hasPermissions()) {
             failureCallback.apply(LocationError.PERMISSION_DENIED);
+            return;
+        }
+
+        if (!isLocationEnabled()) {
+            failureCallback.apply(LocationError.LOCATION_UNKNOWN);
             return;
         }
 
@@ -51,6 +64,21 @@ public class LocationController {
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION)
                 .allMatch(permission -> ActivityCompat.checkSelfPermission(mContext, permission) == PackageManager.PERMISSION_GRANTED);
+    }
+
+    private boolean isLocationEnabled() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+            return lm.isLocationEnabled();
+        } else {
+            int mode = Settings.Secure.getInt(
+                    mContext.getContentResolver(),
+                    Settings.Secure.LOCATION_MODE,
+                    Settings.Secure.LOCATION_MODE_OFF
+            );
+
+            return mode != Settings.Secure.LOCATION_MODE_OFF;
+        }
     }
 
     private LocationRequest getLocationRequest(CurrentPositionRequest currentPositionRequest) {
