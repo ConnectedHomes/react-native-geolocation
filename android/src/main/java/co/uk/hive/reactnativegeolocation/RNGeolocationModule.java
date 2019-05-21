@@ -6,17 +6,11 @@ import co.uk.hive.reactnativegeolocation.geofence.GeofenceController;
 import co.uk.hive.reactnativegeolocation.geofence.GeofenceServiceLocator;
 import co.uk.hive.reactnativegeolocation.location.LatLng;
 import co.uk.hive.reactnativegeolocation.location.LocationController;
-import co.uk.hive.reactnativegeolocation.location.LocationError;
-
 import com.annimon.stream.Stream;
 import com.annimon.stream.function.Function;
 import com.facebook.react.bridge.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
 
 public class RNGeolocationModule extends ReactContextBaseJavaModule {
 
@@ -36,15 +30,6 @@ public class RNGeolocationModule extends ReactContextBaseJavaModule {
     @Override
     public String getName() {
         return "RNGeolocation";
-    }
-
-    @Nullable
-    @Override
-    public Map<String, Object> getConstants() {
-        final Map<String, Object> constants = new HashMap<>();
-        constants.put("LOCATION_UNKNOWN", LocationError.LOCATION_UNKNOWN);
-        constants.put("PERMISSION_DENIED", LocationError.PERMISSION_DENIED);
-        return constants;
     }
 
     @ReactMethod

@@ -75,12 +75,4 @@ export default class RNGeolocation {
       return promise.then(successCallback).catch(failureCallback);
     }
   }
-
-  static isLocationUnknown(error) {
-    return error === NativeModules.RNGeolocation.LOCATION_UNKNOWN;
-  }
-
-  static isPermissionDenied(error) {
-    return error === NativeModules.RNGeolocation.PERMISSION_DENIED;
-  }
 }
