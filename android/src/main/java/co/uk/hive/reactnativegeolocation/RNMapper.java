@@ -2,14 +2,16 @@ package co.uk.hive.reactnativegeolocation;
 
 import android.os.Bundle;
 import android.os.PersistableBundle;
-import co.uk.hive.reactnativegeolocation.geofence.Geofence;
-import co.uk.hive.reactnativegeolocation.location.CurrentPositionRequest;
-import co.uk.hive.reactnativegeolocation.location.LatLng;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 
 import java.util.List;
+
+import co.uk.hive.reactnativegeolocation.geofence.Geofence;
+import co.uk.hive.reactnativegeolocation.location.CurrentPositionRequest;
+import co.uk.hive.reactnativegeolocation.location.LatLng;
 
 public class RNMapper {
     Geofence readGeofence(ReadableMap map) {
@@ -34,8 +36,8 @@ public class RNMapper {
     }
 
     CurrentPositionRequest readPositionRequest(ReadableMap readableMap) {
-        // Add request fields if needed
-        return new CurrentPositionRequest();
+        final int timeout = readInt(readableMap, "timeout", CurrentPositionRequest.DEFAULT_TIMEOUT);
+        return new CurrentPositionRequest(timeout);
     }
 
     private static String readString(ReadableMap map, String key, String defaultValue) {

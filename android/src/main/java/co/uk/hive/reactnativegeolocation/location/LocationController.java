@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
 
@@ -17,13 +18,17 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.SettingsClient;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class LocationController {
     private final Context mContext;
     private final FusedLocationProviderClient mLocationClient;
+    private final Handler mHandler;
 
     public LocationController(Context context) {
         mContext = context;
         mLocationClient = LocationServices.getFusedLocationProviderClient(context);
+        mHandler = new Handler(Looper.getMainLooper());
     }
 
     @SuppressLint("MissingPermission")
@@ -45,19 +50,32 @@ public class LocationController {
                 .addLocationRequest(locationRequest);
         SettingsClient client = LocationServices.getSettingsClient(mContext);
 
+        final AtomicBoolean locationResultReceived = new AtomicBoolean();
+        final LocationCallback locationCallback = new LocationCallback() {
+            public void onLocationResult(LocationResult locationResult) {
+                locationResultReceived.set(true);
+                mHandler.removeCallbacksAndMessages(null);
+                if (locationResult.getLastLocation() != null) {
+                    successCallback.apply(new LatLng(
+                            locationResult.getLastLocation().getLatitude(),
+                            locationResult.getLastLocation().getLongitude()));
+                } else {
+                    failureCallback.apply(LocationError.LOCATION_UNKNOWN);
+                }
+            }
+        };
+
         client.checkLocationSettings(builder.build())
                 .addOnFailureListener(Runnable::run, ignored -> failureCallback.apply(LocationError.LOCATION_UNKNOWN))
-                .addOnSuccessListener(Runnable::run, ignored -> mLocationClient.requestLocationUpdates(getLocationRequest(currentPositionRequest), new LocationCallback() {
-                    public void onLocationResult(LocationResult locationResult) {
-                        if (locationResult.getLastLocation() != null) {
-                            successCallback.apply(new LatLng(
-                                    locationResult.getLastLocation().getLatitude(),
-                                    locationResult.getLastLocation().getLongitude()));
-                        } else {
-                            failureCallback.apply(LocationError.LOCATION_UNKNOWN);
-                        }
-                    }
-        }, Looper.getMainLooper()));
+                .addOnSuccessListener(Runnable::run, ignored -> mLocationClient.requestLocationUpdates(getLocationRequest(currentPositionRequest), locationCallback, Looper.getMainLooper()));
+
+        final long timeout = currentPositionRequest.getTimeout();
+        mHandler.postDelayed(() -> {
+            if (!locationResultReceived.get()) {
+                mLocationClient.removeLocationUpdates(locationCallback);
+                failureCallback.apply(LocationError.LOCATION_UNKNOWN);
+            }
+        }, timeout);
     }
 
     private boolean hasPermissions() {
@@ -70,6 +88,7 @@ public class LocationController {
     private LocationRequest getLocationRequest(CurrentPositionRequest currentPositionRequest) {
         return new LocationRequest()
                 .setNumUpdates(1)
+                .setExpirationDuration(currentPositionRequest.getTimeout())
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     }
 }

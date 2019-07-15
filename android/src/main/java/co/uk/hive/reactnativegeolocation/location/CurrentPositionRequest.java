@@ -1,5 +1,7 @@
 package co.uk.hive.reactnativegeolocation.location;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * No parameters are used at the moment.
  *
@@ -7,7 +9,15 @@ package co.uk.hive.reactnativegeolocation.location;
  */
 public class CurrentPositionRequest {
 
-    public CurrentPositionRequest() {
-        // TODO add params if needed
+    public static final int DEFAULT_TIMEOUT = (int) TimeUnit.SECONDS.toMillis(30);
+
+    private long mTimeout;
+
+    public CurrentPositionRequest(int timeout) {
+        mTimeout = timeout;
+    }
+
+    public long getTimeout() {
+        return mTimeout;
     }
 }
