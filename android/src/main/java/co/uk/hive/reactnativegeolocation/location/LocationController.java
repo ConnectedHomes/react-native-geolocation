@@ -53,32 +53,9 @@ public class LocationController {
                 .addLocationRequest(locationRequest);
         SettingsClient client = LocationServices.getSettingsClient(mContext);
 
-        final AtomicBoolean locationResultReceived = new AtomicBoolean();
-        final LocationCallback locationCallback = new LocationCallback() {
-            public void onLocationResult(LocationResult locationResult) {
-                locationResultReceived.set(true);
-                mHandler.removeCallbacksAndMessages(null);
-                if (locationResult.getLastLocation() != null) {
-                    successCallback.apply(new LatLng(
-                            locationResult.getLastLocation().getLatitude(),
-                            locationResult.getLastLocation().getLongitude()));
-                } else {
-                    failureCallback.apply(LocationError.LOCATION_UNKNOWN);
-                }
-            }
-        };
-
         client.checkLocationSettings(builder.build())
                 .addOnFailureListener(TaskExecutors.MAIN_THREAD, ignored -> failureCallback.apply(LocationError.LOCATION_UNKNOWN))
-                .addOnSuccessListener(TaskExecutors.MAIN_THREAD, ignored -> mLocationClient.requestLocationUpdates(getLocationRequest(currentPositionRequest), locationCallback, Looper.getMainLooper()));
-
-        final long timeout = currentPositionRequest.getTimeout();
-        mHandler.postDelayed(() -> {
-            if (!locationResultReceived.get()) {
-                mLocationClient.removeLocationUpdates(locationCallback);
-                failureCallback.apply(LocationError.LOCATION_UNKNOWN);
-            }
-        }, timeout);
+                .addOnSuccessListener(TaskExecutors.MAIN_THREAD, ignored -> requestLocation(currentPositionRequest, successCallback, failureCallback));
     }
 
     private boolean hasPermissions() {
@@ -93,5 +70,36 @@ public class LocationController {
                 .setNumUpdates(1)
                 .setExpirationDuration(currentPositionRequest.getTimeout())
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+    }
+
+    @MainThread
+    private void requestLocation(CurrentPositionRequest currentPositionRequest,
+                                 Function<LatLng, Object> successCallback,
+                                 Function<Object, Object> failureCallback) {
+        final AtomicBoolean locationResultReceived = new AtomicBoolean();
+
+        final LocationCallback locationCallback = new LocationCallback() {
+            public void onLocationResult(LocationResult locationResult) {
+                locationResultReceived.set(true);
+                mHandler.removeCallbacksAndMessages(null);
+                if (locationResult.getLastLocation() != null) {
+                    successCallback.apply(new LatLng(
+                            locationResult.getLastLocation().getLatitude(),
+                            locationResult.getLastLocation().getLongitude()));
+                } else {
+                    failureCallback.apply(LocationError.LOCATION_UNKNOWN);
+                }
+            }
+        };
+
+        mLocationClient.requestLocationUpdates(getLocationRequest(currentPositionRequest), locationCallback, Looper.getMainLooper());
+
+        final long timeout = currentPositionRequest.getTimeout();
+        mHandler.postDelayed(() -> {
+            if (!locationResultReceived.get()) {
+                mLocationClient.removeLocationUpdates(locationCallback);
+                failureCallback.apply(LocationError.LOCATION_UNKNOWN);
+            }
+        }, timeout);
     }
 }
