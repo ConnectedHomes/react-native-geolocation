@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.MainThread;
 import android.support.v4.app.ActivityCompat;
 
 import com.annimon.stream.Stream;
@@ -17,6 +18,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.TaskExecutors;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -31,6 +33,7 @@ public class LocationController {
         mHandler = new Handler(Looper.getMainLooper());
     }
 
+    @MainThread
     @SuppressLint("MissingPermission")
     public void getCurrentPosition(CurrentPositionRequest currentPositionRequest,
                                    Function<LatLng, Object> successCallback,
@@ -66,8 +69,8 @@ public class LocationController {
         };
 
         client.checkLocationSettings(builder.build())
-                .addOnFailureListener(Runnable::run, ignored -> failureCallback.apply(LocationError.LOCATION_UNKNOWN))
-                .addOnSuccessListener(Runnable::run, ignored -> mLocationClient.requestLocationUpdates(getLocationRequest(currentPositionRequest), locationCallback, Looper.getMainLooper()));
+                .addOnFailureListener(TaskExecutors.MAIN_THREAD, ignored -> failureCallback.apply(LocationError.LOCATION_UNKNOWN))
+                .addOnSuccessListener(TaskExecutors.MAIN_THREAD, ignored -> mLocationClient.requestLocationUpdates(getLocationRequest(currentPositionRequest), locationCallback, Looper.getMainLooper()));
 
         final long timeout = currentPositionRequest.getTimeout();
         mHandler.postDelayed(() -> {
