@@ -20,8 +20,6 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.TaskExecutors;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class LocationController {
     private final Context mContext;
     private final FusedLocationProviderClient mLocationClient;
@@ -76,18 +74,17 @@ public class LocationController {
     private void requestLocation(CurrentPositionRequest currentPositionRequest,
                                  Function<LatLng, Object> successCallback,
                                  Function<Object, Object> failureCallback) {
-        final AtomicBoolean locationResultReceived = new AtomicBoolean();
+        final SingleLocationCallback singleLocationCallback = new SingleLocationCallback(successCallback, failureCallback);
 
         final LocationCallback locationCallback = new LocationCallback() {
             public void onLocationResult(LocationResult locationResult) {
-                locationResultReceived.set(true);
                 mHandler.removeCallbacksAndMessages(null);
                 if (locationResult.getLastLocation() != null) {
-                    successCallback.apply(new LatLng(
+                    singleLocationCallback.locationReceived(new LatLng(
                             locationResult.getLastLocation().getLatitude(),
                             locationResult.getLastLocation().getLongitude()));
                 } else {
-                    failureCallback.apply(LocationError.LOCATION_UNKNOWN);
+                    singleLocationCallback.locationUnknown();
                 }
             }
         };
@@ -96,10 +93,37 @@ public class LocationController {
 
         final long timeout = currentPositionRequest.getTimeout();
         mHandler.postDelayed(() -> {
-            if (!locationResultReceived.get()) {
-                mLocationClient.removeLocationUpdates(locationCallback);
-                failureCallback.apply(LocationError.LOCATION_UNKNOWN);
-            }
+            mLocationClient.removeLocationUpdates(locationCallback);
+            singleLocationCallback.locationUnknown();
         }, timeout);
+    }
+
+    private static class SingleLocationCallback {
+        private final Function<LatLng, Object> mSuccessCallback;
+        private final Function<Object, Object> mFailureCallback;
+        private boolean mCalledBack;
+
+        private SingleLocationCallback(Function<LatLng, Object> successCallback, Function<Object, Object> failureCallback) {
+            mSuccessCallback = successCallback;
+            mFailureCallback = failureCallback;
+        }
+
+        private void locationReceived(LatLng latLng) {
+            if (mCalledBack) {
+                return;
+            }
+
+            mCalledBack = true;
+            mSuccessCallback.apply(latLng);
+        }
+
+        private void locationUnknown() {
+            if (mCalledBack) {
+                return;
+            }
+
+            mCalledBack = true;
+            mFailureCallback.apply(LocationError.LOCATION_UNKNOWN);
+        }
     }
 }
