@@ -6,8 +6,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.MainThread;
-import android.support.v4.app.ActivityCompat;
+import androidx.annotation.MainThread;
+import androidx.core.app.ActivityCompat;
 
 import com.annimon.stream.Stream;
 import com.annimon.stream.function.Function;
