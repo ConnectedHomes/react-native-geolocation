@@ -39,6 +39,11 @@ class RNHiveGeolocationManager: NSObject {
     private var geofenceRequestCompletion: RNHiveGeofenceRequestCompletion? = nil
     private var geofenceEventResponder: RNHiveGeofenceEventResponder? = nil
     
+    override init() {
+        super.init()
+        self.locationManager.delegate = self
+    }
+    
     @objc public func allGeofences() -> [RNHiveGeofence]  {
         guard let savedData = UserDefaults.standard.data(forKey: savedGeofencesKey) else { return [] }
         let decoder = JSONDecoder()
