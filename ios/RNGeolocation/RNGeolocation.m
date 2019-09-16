@@ -39,39 +39,17 @@ RCT_EXPORT_MODULE();
 }
 
 - (void)invalidate {
-    @synchronized(listeners) {
-        [listeners removeAllObjects];
-    }
+    
 }
 
 #pragma mark - React Native API Methods
 
-RCT_EXPORT_METHOD(addEventListener:(NSString *)event) {
-    @synchronized(listeners) {
-        if ([listeners objectForKey:event]) {
-            // Increment listener-count for this event
-            NSInteger count = [[listeners objectForKey:event] integerValue];
-            count++;
-            [listeners setObject:@(count) forKey:event];
-        } else {
-            // First listener for this event
-            [listeners setObject:@(1) forKey:event];
-            if ([event isEqualToString:EVENT_GEOFENCE]) {
-                __typeof(self) __weak weakSelf = self;
-                [self.locationManager onGeofenceEventWithResponder:^(RNHiveGeofenceEvent * _Nullable geofenceEvent, NSError * _Nullable error) {
-                    [weakSelf sendEvent:EVENT_GEOFENCE body:geofenceEvent.dictionary];
-                }];
-            }
-        }
-    }
+RCT_EXPORT_METHOD(addArrivingNotification:(NSDictionary * _Nullable)arrivingNotification leavingNotification:(NSDictionary * _Nullable)leavingNotification) {
+    [self.locationManager addArrivingNotification:arrivingNotification leavingNotificationDict:leavingNotification];
 }
 
 RCT_EXPORT_METHOD(ready) {
     [self.locationManager configure];
-    __typeof(self) __weak weakSelf = self;
-    [self.locationManager onGeofenceEventWithResponder:^(RNHiveGeofenceEvent * _Nullable geofenceEvent, NSError * _Nullable error) {
-        [weakSelf sendEvent:EVENT_GEOFENCE body:geofenceEvent.dictionary];
-    }];
 }
 
 RCT_EXPORT_METHOD(startGeofences:(RCTResponseSenderBlock)success failure:(RCTResponseSenderBlock)failure) {
