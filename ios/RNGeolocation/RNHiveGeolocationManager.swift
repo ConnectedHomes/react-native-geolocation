@@ -66,6 +66,8 @@ class RNHiveGeolocationManager: NSObject {
     private let locationManager = CLLocationManager()
     
     private let savedGeofencesKey = "savedItems"
+    private let arrivingNotificationKey = "arrivingNotification"
+    private let leavingNotificationKey = "leavingNotification"
     private var geofences: [RNHiveGeofence] = []
     private var regions: [CLCircularRegion] = []
     private var pendingLocationRequests: [RNHiveLocationRequest] = []
@@ -86,12 +88,19 @@ class RNHiveGeolocationManager: NSObject {
             let arrivingBody = arrivingDict["body"],
             let arrivingNodeId = arrivingDict["triggeringNodeId"] {
             arrivingNotification = GeolocationNotification(title: arrivingTitle, body: arrivingBody, associatedNodeId: arrivingNodeId)
+        } else {
+            arrivingNotification = nil
+            UserDefaults.standard.removeObject(forKey: arrivingNotificationKey)
         }
+        
         if let leavingDict = leavingNotificationDict,
             let leavingTitle = leavingDict["title"],
             let leavingBody = leavingDict["body"],
             let leavingNodeId = leavingDict["triggeringNodeId"] {
             leavingNotification = GeolocationNotification(title: leavingTitle, body: leavingBody, associatedNodeId: leavingNodeId)
+        } else {
+            leavingNotification = nil
+            UserDefaults.standard.removeObject(forKey: leavingNotificationKey)
         }
         
         cacheGeofenceNotifications()
@@ -257,7 +266,7 @@ class RNHiveGeolocationManager: NSObject {
         let encoder = JSONEncoder()
         do {
             let data = try encoder.encode(arrivingNotification)
-            UserDefaults.standard.set(data, forKey: "arrivingNotification")
+            UserDefaults.standard.set(data, forKey: arrivingNotificationKey)
         } catch {
             print("error saving notification")
         }
@@ -265,7 +274,7 @@ class RNHiveGeolocationManager: NSObject {
         print("saving leaving event to cache")
         do {
             let data = try encoder.encode(leavingNotification)
-            UserDefaults.standard.set(data, forKey: "leavingNotification")
+            UserDefaults.standard.set(data, forKey: leavingNotificationKey)
         } catch {
             print("error saving notification")
         }
@@ -273,8 +282,8 @@ class RNHiveGeolocationManager: NSObject {
     
     
     private func loadCachedGeofenceNotifications() {
-        guard let savedArriving = UserDefaults.standard.data(forKey: "arrivingNotification"),
-            let savedLeaving = UserDefaults.standard.data(forKey: "leavingNotification")
+        guard let savedArriving = UserDefaults.standard.data(forKey: arrivingNotificationKey),
+            let savedLeaving = UserDefaults.standard.data(forKey: leavingNotificationKey)
             else {
                 return
         }
