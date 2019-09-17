@@ -15,6 +15,12 @@ export default class RNGeolocation {
       });
   }
 
+  static addNotifications(arrivingNotification, leavingNotification) {
+    /*
+    No Android implementation for this atm
+    */
+  }
+
   static onGeofence(geofenceListener) {
     DeviceEventEmitter.addListener('geofence', geofenceListener);
   }

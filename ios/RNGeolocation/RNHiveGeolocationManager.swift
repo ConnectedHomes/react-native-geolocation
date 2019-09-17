@@ -184,7 +184,7 @@ class RNHiveGeolocationManager: NSObject {
             print("Error: no monitoring available")
             return
         }
-        if CLLocationManager.authorizationStatus() != .authorizedAlways {
+        if CLLocationManager.authorizationStatus() != .authorizedAlways && CLLocationManager.authorizationStatus() != .authorizedWhenInUse {
             print("Error: not authorized to start monitoring")
         }
         geofenceRequestCompletion = completion
@@ -208,7 +208,7 @@ class RNHiveGeolocationManager: NSObject {
             let locationRequest = RNHiveLocationRequest(requestId: UUID().uuidString, comletion: completion)
             pendingLocationRequests.append(locationRequest)
         }
-        if CLLocationManager.authorizationStatus() == .authorizedAlways {
+        if CLLocationManager.authorizationStatus() == .authorizedAlways || CLLocationManager.authorizationStatus() == .authorizedWhenInUse {
             locationManager.delegate = self
             locationManager.startUpdatingLocation()
         } else {
@@ -217,7 +217,7 @@ class RNHiveGeolocationManager: NSObject {
     }
     
     private func requestLocationPermissions() {
-        if CLLocationManager.authorizationStatus() != .authorizedAlways {
+        if CLLocationManager.authorizationStatus() != .authorizedAlways && CLLocationManager.authorizationStatus() != .authorizedWhenInUse {
             locationManager.delegate = self
             locationManager.requestAlwaysAuthorization()
         }
@@ -321,7 +321,7 @@ class RNHiveGeolocationManager: NSObject {
 extension RNHiveGeolocationManager: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        if status == .authorizedAlways {
+        if status == .authorizedAlways || status == .authorizedWhenInUse {
             requestLocation(completion: nil)
         }
     }
