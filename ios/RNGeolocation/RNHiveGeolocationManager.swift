@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import CoreLocation
+import UserNotifications
 
 public struct RNHiveLocationRequest {
     let requestId: String
@@ -24,6 +25,39 @@ typealias RNHiveLocationRequestCompletion = (_ locations: [CLLocation]?, _ error
 typealias RNHiveGeofenceRequestCompletion = (_ regions: [CLCircularRegion]?, _ error: Error?) -> Void
 typealias RNHiveGeofenceEventResponder = (_ geofenceEvent: RNHiveGeofenceEvent?, _ error: Error?) -> Void
 
+
+struct GeolocationNotification: Codable {
+    let title: String
+    let body: String
+    let associatedNodeId: String
+    
+    enum GeolocationNotificationKeys: String, CodingKey {
+        case title, body, timestamp,  associatedNodeId
+    }
+    
+    init(title: String, body: String, associatedNodeId: String) {
+        self.title = title
+        self.body = body
+        self.associatedNodeId = associatedNodeId
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: GeolocationNotificationKeys.self)
+        try container.encode(title, forKey: .title)
+        try container.encode(body, forKey: .body)
+        try container.encode(associatedNodeId, forKey: .associatedNodeId)
+    }
+    
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: GeolocationNotificationKeys.self)
+        title = try values.decode(String.self, forKey: .title)
+        body = try values.decode(String.self, forKey: .body)
+        associatedNodeId  = try values.decode(String.self, forKey: .associatedNodeId)
+    }
+    
+}
+
+
 @objc(RNHiveGeolocationManager)
 class RNHiveGeolocationManager: NSObject {
     
@@ -38,10 +72,29 @@ class RNHiveGeolocationManager: NSObject {
     
     private var geofenceRequestCompletion: RNHiveGeofenceRequestCompletion? = nil
     private var geofenceEventResponder: RNHiveGeofenceEventResponder? = nil
+    private var arrivingNotification: GeolocationNotification? = nil
+    private var leavingNotification: GeolocationNotification? = nil
     
     override init() {
         super.init()
         self.locationManager.delegate = self
+    }
+    
+    @objc public func addArrivingNotification(_ arrivingNotiticationDict: [String: String]?, leavingNotificationDict: [String: String]?) {
+        if let arrivingDict = arrivingNotiticationDict,
+            let arrivingTitle = arrivingDict["title"],
+            let arrivingBody = arrivingDict["body"],
+            let arrivingNodeId = arrivingDict["triggeringNodeId"] {
+            arrivingNotification = GeolocationNotification(title: arrivingTitle, body: arrivingBody, associatedNodeId: arrivingNodeId)
+        }
+        if let leavingDict = leavingNotificationDict,
+            let leavingTitle = leavingDict["title"],
+            let leavingBody = leavingDict["body"],
+            let leavingNodeId = leavingDict["triggeringNodeId"] {
+            leavingNotification = GeolocationNotification(title: leavingTitle, body: leavingBody, associatedNodeId: leavingNodeId)
+        }
+        
+        cacheGeofenceNotifications()
     }
     
     @objc public func allGeofences() -> [RNHiveGeofence]  {
@@ -198,6 +251,43 @@ class RNHiveGeolocationManager: NSObject {
         saveGeofences()
     }
     
+    private func cacheGeofenceNotifications() {
+        print("saving arriving event to cache")
+        
+        let encoder = JSONEncoder()
+        do {
+            let data = try encoder.encode(arrivingNotification)
+            UserDefaults.standard.set(data, forKey: "arrivingNotification")
+        } catch {
+            print("error saving notification")
+        }
+        
+        print("saving leaving event to cache")
+        do {
+            let data = try encoder.encode(leavingNotification)
+            UserDefaults.standard.set(data, forKey: "leavingNotification")
+        } catch {
+            print("error saving notification")
+        }
+    }
+    
+    
+    private func loadCachedGeofenceNotifications() {
+        guard let savedArriving = UserDefaults.standard.data(forKey: "arrivingNotification"),
+            let savedLeaving = UserDefaults.standard.data(forKey: "leavingNotification")
+            else {
+                return
+        }
+        let decoder = JSONDecoder()
+        if let arriving = try? decoder.decode(GeolocationNotification.self, from: savedArriving) as GeolocationNotification {
+            arrivingNotification = arriving
+            
+        }
+        if let leaving = try? decoder.decode(GeolocationNotification.self, from: savedLeaving) as GeolocationNotification {
+            leavingNotification = leaving
+        }
+    }
+    
     private func updateRegionMonitoring(for geofence: RNHiveGeofence) {
         stopMonitoring(geofence: geofence)
         startMonitoring(geofence: geofence)
@@ -206,25 +296,27 @@ class RNHiveGeolocationManager: NSObject {
     private func handleRegionEvent(for region: CLRegion, event: RNHiveGeofenceCrossingEvent) {
         
         guard let geofence = allGeofences().filter({ $0.identifier == region.identifier }).first,
-              let location = locationManager.location,
-              let region = region as? CLCircularRegion else {
-            return
+            let location = locationManager.location,
+            let region = region as? CLCircularRegion else {
+                return
         }
         let geofenceEvent = RNHiveGeofenceEvent(geofence: geofence, location: location, region: region, time: Date(), type: event)
         if let responder = geofenceEventResponder {
             responder(geofenceEvent, nil)
         }
+        loadCachedGeofenceNotifications()
+        postLocalNotification(for: geofence, event: geofenceEvent, crossingType: event)
     }
 }
 
 extension RNHiveGeolocationManager: CLLocationManagerDelegate {
-
+    
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         if status == .authorizedAlways {
             requestLocation(completion: nil)
         }
     }
-
+    
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.first {
             print("coordinates: \(location.coordinate.latitude), \(location.coordinate.longitude)")
@@ -289,6 +381,35 @@ extension RNHiveGeolocationManager: CLLocationManagerDelegate {
         }
     }
     
+    
+    private func showLocalNotification(_ identifier:String, title: String, body: String, extras: [AnyHashable : Any]) {
+        let notificationContent = UNMutableNotificationContent()
+        notificationContent.body = body
+        notificationContent.title = title
+        notificationContent.sound = UNNotificationSound.default
+        notificationContent.badge = 0
+        notificationContent.userInfo = extras
+        
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.5, repeats: false)
+        let request = UNNotificationRequest(identifier: identifier, content: notificationContent, trigger: trigger)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error: \(error)")
+            }
+        }
+    }
+    
+    private func postLocalNotification(for geofence: RNHiveGeofence, event: RNHiveGeofenceEvent, crossingType: RNHiveGeofenceCrossingEvent) {
+        
+        if crossingType == .entry,
+            let arriving = arrivingNotification {
+            showLocalNotification("arriving", title: arriving.title, body: arriving.body, extras: ["data":["triggeringNodeId": arriving.associatedNodeId]])
+        } else if crossingType == .exit,
+            let leaving = leavingNotification {
+            showLocalNotification("leaving", title: leaving.title, body: leaving.body, extras: ["data":["triggeringNodeId": leaving.associatedNodeId]])
+        }
+        
+    }
 }
 
 
