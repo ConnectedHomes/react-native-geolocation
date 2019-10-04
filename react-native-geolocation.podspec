@@ -15,4 +15,5 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/ConnectedHomes/react-native-geolocation.git", :tag => "v#{s.version}" }
   s.source_files  = "ios/RNGeolocation/*.{h,m,swift}"
   s.dependency 'React'
+  s.swift_version = '5.0'
 end

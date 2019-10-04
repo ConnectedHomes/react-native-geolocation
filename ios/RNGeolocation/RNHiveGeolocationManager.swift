@@ -21,9 +21,9 @@ enum RNHiveGeofenceCrossingEvent: String {
     case exit  = "EXIT"
 }
 
-typealias RNHiveLocationRequestCompletion = (_ locations: [CLLocation]?, _ error: Error?) -> Void
-typealias RNHiveGeofenceRequestCompletion = (_ regions: [CLCircularRegion]?, _ error: Error?) -> Void
-typealias RNHiveGeofenceEventResponder = (_ geofenceEvent: RNHiveGeofenceEvent?, _ error: Error?) -> Void
+public typealias RNHiveLocationRequestCompletion = (_ locations: [CLLocation]?, _ error: Error?) -> Void
+public typealias RNHiveGeofenceRequestCompletion = (_ regions: [CLCircularRegion]?, _ error: Error?) -> Void
+public typealias RNHiveGeofenceEventResponder = (_ geofenceEvent: RNHiveGeofenceEvent?, _ error: Error?) -> Void
 
 
 struct GeolocationNotification: Codable {
@@ -59,7 +59,7 @@ struct GeolocationNotification: Codable {
 
 
 @objc(RNHiveGeolocationManager)
-class RNHiveGeolocationManager: NSObject {
+public class RNHiveGeolocationManager: NSObject {
     
     static let shared = RNHiveGeolocationManager()
     
@@ -77,7 +77,7 @@ class RNHiveGeolocationManager: NSObject {
     private var arrivingNotification: GeolocationNotification? = nil
     private var leavingNotification: GeolocationNotification? = nil
     
-    override init() {
+    public override init() {
         super.init()
         self.locationManager.delegate = self
     }
@@ -139,7 +139,7 @@ class RNHiveGeolocationManager: NSObject {
         return geofence
     }
     
-    @objc func configure() {
+    @objc public func configure() {
         self.locationManager.delegate = self
         let _ = allGeofences()
     }
@@ -320,32 +320,32 @@ class RNHiveGeolocationManager: NSObject {
 
 extension RNHiveGeolocationManager: CLLocationManagerDelegate {
     
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+    public func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         if status == .authorizedAlways || status == .authorizedWhenInUse {
             requestLocation(completion: nil)
         }
     }
     
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.first {
             print("coordinates: \(location.coordinate.latitude), \(location.coordinate.longitude)")
         }
         processPendingLocationRequests(locations: locations, error: nil)
     }
     
-    func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error) {
+    public func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error) {
         print("monitoring failed for region: \(String(describing: region?.identifier))")
         if let circularRegion = region as? CLCircularRegion {
             processGeofenceCompletion(regions: [circularRegion], error: error)
         }
     }
     
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+    public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("location managed did fail with error: \(error)")
         processPendingLocationRequests(locations: nil, error: error)
     }
     
-    func locationManager(_ manager: CLLocationManager, didStartMonitoringFor region: CLRegion) {
+    public func locationManager(_ manager: CLLocationManager, didStartMonitoringFor region: CLRegion) {
         print("monitoring started for region: \(region)")
         if let circularRegion = region as? CLCircularRegion {
             processGeofenceCompletion(regions: [circularRegion], error: nil)
@@ -353,13 +353,13 @@ extension RNHiveGeolocationManager: CLLocationManagerDelegate {
         
     }
     
-    func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
+    public func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
         if region is CLCircularRegion {
             handleRegionEvent(for: region, event: .entry)
         }
     }
     
-    func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
+    public func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
         if region is CLCircularRegion {
             handleRegionEvent(for: region, event: .exit)
         }
