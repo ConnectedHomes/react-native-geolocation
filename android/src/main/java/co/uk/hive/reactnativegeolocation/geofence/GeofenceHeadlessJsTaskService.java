@@ -6,7 +6,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.PersistableBundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 import co.uk.hive.reactnativegeolocation.RNMapper;
 import com.facebook.react.JobHeadlessJsTaskService;

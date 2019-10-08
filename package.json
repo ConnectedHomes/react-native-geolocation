@@ -1,5 +1,5 @@
 {
-  "name": "@connected-home/react-native-geolocation",
+  "name": "react-native-geolocation",
   "version": "1.4.4",
   "homepage": "https://github.com/ConnectedHomes/react-native-geolocation",
   "description": "Basic geolocation + geofencing. Delegates to react-native-background-geolocation for iOS.",
@@ -14,7 +14,7 @@
     "geofencing"
   ],
   "author": "",
-  "license": "",
+  "license": "MIT",
   "peerDependencies": {
     "react-native": ">=0.36.0"
   },

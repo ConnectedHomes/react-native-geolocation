@@ -10,7 +10,7 @@ import Foundation
 import CoreLocation
 
 @objc(RNHiveGeofenceEvent)
-class RNHiveGeofenceEvent: NSObject/*: Codable */ {
+public class RNHiveGeofenceEvent: NSObject/*: Codable */ {
     @objc var location: CLLocation
     @objc var geofence: RNHiveGeofence
     @objc var region: CLCircularRegion

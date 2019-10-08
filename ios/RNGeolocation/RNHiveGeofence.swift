@@ -10,7 +10,7 @@ import Foundation
 import CoreLocation
 
 @objc(RNHiveGeofence)
-class RNHiveGeofence: NSObject, Codable {
+public class RNHiveGeofence: NSObject, Codable {
     
     @objc var coordinate: CLLocationCoordinate2D
     @objc var radius: CLLocationDistance
@@ -59,7 +59,7 @@ class RNHiveGeofence: NSObject, Codable {
         return "Radius: \(radius)"
     }
     
-    required init(from decoder: Decoder) throws {
+    required public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: RNHiveGeofenceKeys.self)
         let latitude = try values.decode(CLLocationDegrees.self, forKey: .latitude)
         let longitude = try values.decode(CLLocationDegrees.self, forKey: .longitude)
@@ -72,7 +72,7 @@ class RNHiveGeofence: NSObject, Codable {
         
     }
     
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: RNHiveGeofenceKeys.self)
         try container.encode(coordinate.latitude, forKey: .latitude)
         try container.encode(coordinate.longitude, forKey: .longitude)

@@ -8,7 +8,7 @@
 
 #import "RNGeolocation.h"
 #import <CoreLocation/CoreLocation.h>
-#import "RNGeolocation-Swift.h"
+#import <react_native_geolocation/react_native_geolocation-Swift.h>
 
 static NSString *const EVENT_GEOFENCE = @"geofence";
 
