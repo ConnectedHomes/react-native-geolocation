@@ -52,7 +52,8 @@ public class GeofenceEventBroadcastReceiver extends BroadcastReceiver {
     }
 
     private void sendEvent(Context context, Geofence geofence, GeofencingEvent event) {
-        PersistableBundle bundle = mGeofenceMapper.toBundle(event, geofence);
+        long timestamp = System.currentTimeMillis();
+        PersistableBundle bundle = mGeofenceMapper.toBundle(event, geofence, timestamp);
         if (mForegroundChecker.isAppInForeground()) {
             emitRNEvent(context, bundle);
         } else {
