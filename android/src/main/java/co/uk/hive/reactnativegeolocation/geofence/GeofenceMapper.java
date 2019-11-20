@@ -7,10 +7,11 @@ import com.google.android.gms.location.GeofencingEvent;
 import static com.google.android.gms.location.Geofence.*;
 
 class GeofenceMapper {
-    PersistableBundle toBundle(GeofencingEvent event, Geofence geofence) {
+    PersistableBundle toBundle(GeofencingEvent event, Geofence geofence, long timestamp) {
         PersistableBundle bundle = new PersistableBundle();
         bundle.putString("action", getGeofenceAction(event.getGeofenceTransition()));
         bundle.putString("identifier", geofence.getId());
+        bundle.putLong("timestamp", timestamp);
         bundle.putPersistableBundle("location", getLocationBundle(event.getTriggeringLocation()));
         return bundle;
     }

@@ -1,6 +1,6 @@
 {
   "name": "@connected-home/react-native-geolocation",
-  "version": "1.4.6",
+  "version": "1.5.0",
   "homepage": "https://github.com/ConnectedHomes/react-native-geolocation",
   "description": "Basic geolocation + geofencing. Delegates to react-native-background-geolocation for iOS.",
   "main": "index.js",
