@@ -13,13 +13,22 @@ export default class RNGeolocation {
   }
 
   static addNotifications(arrivingNotification, leavingNotification) {
-    NativeModules.RNGeolocation.addArrivingNotification(arrivingNotification, leavingNotification)
+    /*
+    TODO: cleanup this after testing 
+    */
   }
 
   static onGeofence(geofenceListener) {
+    const GeofenceEvents = new NativeEventEmitter(NativeModules.RNGeolocation)
+    GeofenceEvents.addListener('geofence', geofenceListener);
+
     /*
     This is handled by the native code on it's own
     */
+  }
+
+  static checkAndTriggerCachedEvents() {
+    NativeModules.RNGeolocation.checkAndTriggerCachedEvents();
   }
 
   static startGeofences(successCallback, failureCallback) {

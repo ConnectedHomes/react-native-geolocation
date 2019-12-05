@@ -34,6 +34,14 @@ RCT_EXPORT_MODULE();
     return self;
 }
 
+- (void)configure {
+    [self.locationManager configure];
+    __typeof(self) __weak weakSelf = self;
+    [self.locationManager onGeofenceEventWithResponder:^(RNHiveGeofenceEvent * _Nullable geofenceEvent, NSError * _Nullable error) {
+        [weakSelf sendEvent:EVENT_GEOFENCE body:geofenceEvent.dictionary];
+    }];
+}
+
 - (NSArray<NSString *> *)supportedEvents {
     return @[EVENT_GEOFENCE];
 }
@@ -49,7 +57,7 @@ RCT_EXPORT_METHOD(addArrivingNotification:(NSDictionary * _Nullable)arrivingNoti
 }
 
 RCT_EXPORT_METHOD(ready) {
-    [self.locationManager configure];
+    [self configure];
 }
 
 RCT_EXPORT_METHOD(startGeofences:(RCTResponseSenderBlock)success failure:(RCTResponseSenderBlock)failure) {
@@ -70,6 +78,10 @@ RCT_EXPORT_METHOD(stopGeofences:(RCTResponseSenderBlock)success failure:(RCTResp
             success(@[]);
         }
     }];
+}
+
+RCT_EXPORT_METHOD(checkAndTriggerCachedEvents) {
+    [self.locationManager triggerStoredEvents];
 }
 
 RCT_EXPORT_METHOD(addGeofences:(NSArray <NSDictionary *> *)geofences) {

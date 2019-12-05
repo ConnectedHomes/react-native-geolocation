@@ -71,6 +71,7 @@ public class RNHiveGeolocationManager: NSObject {
     private var geofences: [RNHiveGeofence] = []
     private var regions: [CLCircularRegion] = []
     private var pendingLocationRequests: [RNHiveLocationRequest] = []
+    private var storedGeofenceNotifications: [RNHiveGeofenceEvent] = []
     
     private var geofenceRequestCompletion: RNHiveGeofenceRequestCompletion? = nil
     private var geofenceEventResponder: RNHiveGeofenceEventResponder? = nil
@@ -194,6 +195,15 @@ public class RNHiveGeolocationManager: NSObject {
         
     }
     
+    @objc public func triggerStoredEvents() {
+        for event in storedGeofenceNotifications {
+            if let responder = geofenceEventResponder {
+                responder(event, nil)
+            }
+        }
+        storedGeofenceNotifications.removeAll()
+    }
+    
     @objc public func stopMonitoringGeofences(_ completion: RNHiveGeofenceRequestCompletion?) {
         geofenceRequestCompletion = completion
         for geofence in geofences {
@@ -312,9 +322,14 @@ public class RNHiveGeolocationManager: NSObject {
         let geofenceEvent = RNHiveGeofenceEvent(geofence: geofence, location: location, region: region, time: Date(), type: event)
         if let responder = geofenceEventResponder {
             responder(geofenceEvent, nil)
+            print("notification posted from handle events")
+        } else {
+            saveGeofenceEventNotification(event: geofenceEvent)
         }
-        loadCachedGeofenceNotifications()
-        postLocalNotification(for: geofence, event: geofenceEvent, crossingType: event)
+    }
+    
+    private func saveGeofenceEventNotification(event: RNHiveGeofenceEvent) {
+        storedGeofenceNotifications.append(event)
     }
 }
 
