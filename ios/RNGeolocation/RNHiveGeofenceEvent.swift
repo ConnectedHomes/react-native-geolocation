@@ -17,6 +17,14 @@ public class RNHiveGeofenceEvent: NSObject/*: Codable */ {
     @objc var action: String
     @objc var time: Date
     
+    enum RNHiveGeofenceEventDictionaryKeys: String, CodingKey {
+        case action     = "action"
+        case identifier = "identifier"
+        case location   = "location"
+        case geofence   = "geofence"
+        case timestamp  = "timestamp"
+    }
+    
     enum RNHiveGeofenceEventKeys: String, CodingKey {
         case location, geofence, region,  action, time
     }
@@ -28,19 +36,8 @@ public class RNHiveGeofenceEvent: NSObject/*: Codable */ {
         self.time = time
         self.action = type.rawValue
     }
-}
 
-extension RNHiveGeofenceEvent {
-    enum RNHiveGeofenceEventDictionaryKeys: String, CodingKey {
-        case action     = "action"
-        case identifier = "identifier"
-        case location   = "location"
-        case geofence   = "geofence"
-        case timestamp  = "timestamp"
-    }
-    
-    @objc var dictionary: [String: Any]? {
-        
+    @objc public func toDictionary() -> [String: Any] {
         var dictionary = [RNHiveGeofenceEventDictionaryKeys.action.rawValue: self.action,
                           RNHiveGeofenceEventDictionaryKeys.identifier.rawValue: self.geofence.identifier
             ] as [String: Any]
