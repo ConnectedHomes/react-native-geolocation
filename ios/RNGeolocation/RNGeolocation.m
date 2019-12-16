@@ -38,7 +38,7 @@ RCT_EXPORT_MODULE();
     [self.locationManager configure];
     __typeof(self) __weak weakSelf = self;
     [self.locationManager onGeofenceEventWithResponder:^(RNHiveGeofenceEvent * _Nullable geofenceEvent, NSError * _Nullable error) {
-        [weakSelf sendEvent:EVENT_GEOFENCE body:geofenceEvent.dictionary];
+        [weakSelf sendEvent:EVENT_GEOFENCE body:[geofenceEvent toDictionary]];
     }];
 }
 
