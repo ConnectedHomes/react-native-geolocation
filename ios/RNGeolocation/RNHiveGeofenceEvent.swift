@@ -17,6 +17,10 @@ public class RNHiveGeofenceEvent: NSObject/*: Codable */ {
     @objc var action: String
     @objc var time: Date
     
+    private struct RNHiveGeofenceEventConstants {
+        static let timestampBias: TimeInterval = 5.0
+    }
+    
     enum RNHiveGeofenceEventDictionaryKeys: String, CodingKey {
         case action     = "action"
         case identifier = "identifier"
@@ -55,8 +59,12 @@ extension RNHiveGeofenceEvent {
         geofence1.region.center.latitude == geofence2.region.center.latitude &&
         geofence1.region.center.longitude == geofence2.region.center.longitude &&
         geofence1.geofence == geofence2.geofence &&
-        (abs(geofence1.time.timeIntervalSince(geofence2.time)) < 5)
+        geofence1.isClose(to: geofence2)
         return equal
+    }
+    
+    public func isClose(to event: RNHiveGeofenceEvent) -> Bool {
+        return (abs(self.time.timeIntervalSince(event.time)) < RNHiveGeofenceEventConstants.timestampBias)
     }
 }
 
