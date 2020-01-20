@@ -91,6 +91,18 @@ public class RNHiveGeofence: NSObject, Codable {
 }
 
 extension RNHiveGeofence {
+    public static func ==(geofence1: RNHiveGeofence, geofence2: RNHiveGeofence) -> Bool {
+        let equal = geofence1.coordinate.latitude == geofence2.coordinate.latitude &&
+        geofence1.coordinate.longitude == geofence2.coordinate.longitude &&
+        geofence1.radius == geofence2.radius &&
+        geofence1.identifier == geofence2.identifier &&
+        geofence1.notifyOnEntry == geofence2.notifyOnEntry &&
+        geofence1.notifyOnExit == geofence2.notifyOnExit
+        return equal
+    }
+}
+
+extension RNHiveGeofence {
     enum RNHiveGeofenceDictionaryKeys: String, CodingKey {
         case identifier = "identifier"
     }

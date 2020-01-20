@@ -198,6 +198,7 @@ public class RNHiveGeolocationManager: NSObject {
     @objc public func triggerStoredEvents() {
         for event in storedGeofenceNotifications {
             if let responder = geofenceEventResponder {
+                print("triggering stored geofence: \(event)")
                 responder(event, nil)
             }
         }
@@ -329,7 +330,11 @@ public class RNHiveGeolocationManager: NSObject {
     }
     
     private func saveGeofenceEventNotification(event: RNHiveGeofenceEvent) {
-        storedGeofenceNotifications.append(event)
+        if !storedGeofenceNotifications.contains(where: { (geofenceEvent) -> Bool in
+            return geofenceEvent == event
+        }) {
+            storedGeofenceNotifications.append(event)
+        }
     }
 }
 
