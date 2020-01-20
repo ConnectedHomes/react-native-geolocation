@@ -17,6 +17,10 @@ public class RNHiveGeofenceEvent: NSObject/*: Codable */ {
     @objc var action: String
     @objc var time: Date
     
+    private struct RNHiveGeofenceEventConstants {
+        static let timestampBias: TimeInterval = 5.0
+    }
+    
     enum RNHiveGeofenceEventDictionaryKeys: String, CodingKey {
         case action     = "action"
         case identifier = "identifier"
@@ -43,8 +47,24 @@ public class RNHiveGeofenceEvent: NSObject/*: Codable */ {
             ] as [String: Any]
         dictionary[RNHiveGeofenceEventDictionaryKeys.location.rawValue] = self.location.dictionary
         dictionary[RNHiveGeofenceEventDictionaryKeys.geofence.rawValue] = self.geofence.dictionary
-        dictionary[RNHiveGeofenceEventDictionaryKeys.timestamp.rawValue] = self.time
+        dictionary[RNHiveGeofenceEventDictionaryKeys.timestamp.rawValue] = self.time.millisecondsSince1970
         return dictionary
+    }
+}
+
+extension RNHiveGeofenceEvent {
+    public static func ==(geofence1: RNHiveGeofenceEvent, geofence2: RNHiveGeofenceEvent) -> Bool {
+        let equal = geofence1.action == geofence2.action &&
+        geofence1.region.radius == geofence2.region.radius &&
+        geofence1.region.center.latitude == geofence2.region.center.latitude &&
+        geofence1.region.center.longitude == geofence2.region.center.longitude &&
+        geofence1.geofence == geofence2.geofence &&
+        geofence1.isClose(to: geofence2)
+        return equal
+    }
+    
+    public func isClose(to event: RNHiveGeofenceEvent) -> Bool {
+        return (abs(self.time.timeIntervalSince(event.time)) < RNHiveGeofenceEventConstants.timestampBias)
     }
 }
 
