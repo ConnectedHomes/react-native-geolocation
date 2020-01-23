@@ -75,7 +75,7 @@ public class RNHiveGeolocationManager: NSObject {
      serves as a workaround to store a single event that triggered app to start in the background,
      so that it can be retrieved later after JS finishes it's procedures.
      */
-    private var storedGeofenceNotifications: [RNHiveGeofenceEvent] = []
+    private var pendingGeofenceNotification: RNHiveGeofenceEvent? = nil
     
     private var geofenceRequestCompletion: RNHiveGeofenceRequestCompletion? = nil
     private var geofenceEventResponder: RNHiveGeofenceEventResponder? = nil
@@ -200,13 +200,12 @@ public class RNHiveGeolocationManager: NSObject {
     }
     
     @objc public func triggerStoredEvents() {
-        for event in storedGeofenceNotifications {
-            if let responder = geofenceEventResponder {
-                print("triggering stored geofence: \(event)")
-                responder(event, nil)
-            }
+        guard let pendingNotification = pendingGeofenceNotification,
+            let responder = geofenceEventResponder else {
+                return
         }
-        storedGeofenceNotifications.removeAll()
+        responder(pendingNotification, nil)
+        pendingGeofenceNotification = nil
     }
     
     @objc public func stopMonitoringGeofences(_ completion: RNHiveGeofenceRequestCompletion?) {
@@ -334,11 +333,7 @@ public class RNHiveGeolocationManager: NSObject {
     }
     
     private func saveGeofenceEventNotification(event: RNHiveGeofenceEvent) {
-        if !storedGeofenceNotifications.contains(where: { (geofenceEvent) -> Bool in
-            return geofenceEvent == event
-        }) {
-            storedGeofenceNotifications.append(event)
-        }
+        pendingGeofenceNotification = event
     }
 }
 
