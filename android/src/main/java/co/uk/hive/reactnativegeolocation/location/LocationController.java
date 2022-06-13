@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
+
 import androidx.annotation.MainThread;
 import androidx.core.app.ActivityCompat;
 
@@ -58,16 +60,16 @@ public class LocationController {
 
     private boolean hasPermissions() {
         return Stream.of(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION)
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION)
                 .allMatch(permission -> ActivityCompat.checkSelfPermission(mContext, permission) == PackageManager.PERMISSION_GRANTED);
     }
 
     private LocationRequest getLocationRequest(CurrentPositionRequest currentPositionRequest) {
-        return new LocationRequest()
+        return LocationRequest.create()
                 .setNumUpdates(1)
-                .setExpirationDuration(currentPositionRequest.getTimeout())
-                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setExpirationDuration(currentPositionRequest.getTimeout());
     }
 
     @MainThread
@@ -89,6 +91,11 @@ public class LocationController {
             }
         };
 
+        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.e(LocationController.class.getName(), "Missing required location permissions!");
+            return;
+        }
         mLocationClient.requestLocationUpdates(getLocationRequest(currentPositionRequest), locationCallback, Looper.getMainLooper());
 
         final long timeout = currentPositionRequest.getTimeout();
