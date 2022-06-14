@@ -11,7 +11,6 @@ import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.MainThread;
-import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import com.annimon.stream.Stream;
@@ -26,17 +25,14 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.Priority;
 import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskExecutors;
-
-import java.util.Objects;
 
 public class LocationController {
     private final Context mContext;
     private final FusedLocationProviderClient mLocationClient;
     private final Handler mHandler;
+    private static final long CURRENT_LOCATION_REQUEST_DURATION_MILLIS = 3000;
 
     public LocationController(Context context) {
         mContext = context;
@@ -49,41 +45,42 @@ public class LocationController {
     public void getCurrentPosition(CurrentPositionRequest currentPositionRequest,
                                    Function<LatLng, Object> successCallback,
                                    Function<Object, Object> failureCallback) {
+
+        // Android 8 and below (Fused location provider not working when device only location mode set in OS)
         if (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.O) {
-            // TODO: Try current position for Android 8? Also, try build on device etc... also try play services 20?
             final CurrentLocationRequest currentLocationRequest = new CurrentLocationRequest.Builder()
                     .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
                     .setGranularity(Granularity.GRANULARITY_FINE)
-                    .setDurationMillis(3000).build();
+                    .setDurationMillis(CURRENT_LOCATION_REQUEST_DURATION_MILLIS).build();
 
-            // TODO: How do we use the cancellation token? do we need it?
             final Task<Location> currentLocationTask = mLocationClient.getCurrentLocation(currentLocationRequest, null);
             currentLocationTask.addOnSuccessListener(location -> successCallback.apply(new LatLng(location.getLatitude(), location.getLongitude())));
             currentLocationTask.addOnFailureListener(e -> {
-                Log.e(LocationController.class.getName(), Objects.requireNonNull(e.getMessage()));
+                Log.e(LocationController.class.getName(), e.getMessage() != null ? e.getMessage() : "Unable to access current position!");
                 failureCallback.apply(LocationError.LOCATION_UNKNOWN);
             });
-
-        } else {
-            if (mLocationClient == null) {
-                failureCallback.apply(LocationError.LOCATION_UNKNOWN);
-                return;
-            }
-
-            if (!hasPermissions()) {
-                failureCallback.apply(LocationError.PERMISSION_DENIED);
-                return;
-            }
-
-            final LocationRequest locationRequest = getLocationRequest(currentPositionRequest);
-            LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                    .addLocationRequest(locationRequest);
-            SettingsClient client = LocationServices.getSettingsClient(mContext);
-
-            client.checkLocationSettings(builder.build())
-                    .addOnFailureListener(TaskExecutors.MAIN_THREAD, ignored -> failureCallback.apply(LocationError.LOCATION_UNKNOWN))
-                    .addOnSuccessListener(TaskExecutors.MAIN_THREAD, ignored -> requestLocation(currentPositionRequest, successCallback, failureCallback));
+            return;
         }
+
+        // Android 9+ (Fused location provider will use a number of sources to calculate accuracy - cell, wifi, bluetooth, gps etc..)
+        if (mLocationClient == null) {
+            failureCallback.apply(LocationError.LOCATION_UNKNOWN);
+            return;
+        }
+
+        if (!hasPermissions()) {
+            failureCallback.apply(LocationError.PERMISSION_DENIED);
+            return;
+        }
+
+        final LocationRequest locationRequest = getLocationRequest(currentPositionRequest);
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
+        SettingsClient client = LocationServices.getSettingsClient(mContext);
+
+        client.checkLocationSettings(builder.build())
+                .addOnFailureListener(TaskExecutors.MAIN_THREAD, ignored -> failureCallback.apply(LocationError.LOCATION_UNKNOWN))
+                .addOnSuccessListener(TaskExecutors.MAIN_THREAD, ignored -> requestLocation(currentPositionRequest, successCallback, failureCallback));
     }
 
     private boolean hasPermissions() {
@@ -96,7 +93,7 @@ public class LocationController {
     private LocationRequest getLocationRequest(CurrentPositionRequest currentPositionRequest) {
         return LocationRequest.create()
                 .setNumUpdates(1)
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
                 .setExpirationDuration(currentPositionRequest.getTimeout());
     }
 
@@ -121,7 +118,9 @@ public class LocationController {
 
         if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.e(LocationController.class.getName(), "Missing required location permissions!");
+            final String errorMessage = "Missing the required location permissions!";
+            Log.e(LocationController.class.getName(), errorMessage);
+            failureCallback.apply(errorMessage);
             return;
         }
         mLocationClient.requestLocationUpdates(getLocationRequest(currentPositionRequest), locationCallback, Looper.getMainLooper());
