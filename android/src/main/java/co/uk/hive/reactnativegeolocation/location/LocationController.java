@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -33,6 +34,7 @@ public class LocationController {
     private final FusedLocationProviderClient mLocationClient;
     private final Handler mHandler;
     private static final long CURRENT_LOCATION_REQUEST_DURATION_MILLIS = 3000;
+    private static final boolean IS_ANDROID_8_OR_BELOW = !(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P);
 
     public LocationController(Context context) {
         mContext = context;
@@ -40,30 +42,24 @@ public class LocationController {
         mHandler = new Handler(Looper.getMainLooper());
     }
 
+    private boolean isLocationEnabled() {
+        final LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+        if (locationManager != null) {
+            if (!IS_ANDROID_8_OR_BELOW) {
+                return locationManager.isLocationEnabled();
+            } else {
+                return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            }
+        }
+        return false;
+    }
+
     @MainThread
     @SuppressLint("MissingPermission")
     public void getCurrentPosition(CurrentPositionRequest currentPositionRequest,
                                    Function<LatLng, Object> successCallback,
                                    Function<Object, Object> failureCallback) {
-
-        // Android 8 and below (Fused location provider not working when device only location mode set in OS)
-        if (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.O) {
-            final CurrentLocationRequest currentLocationRequest = new CurrentLocationRequest.Builder()
-                    .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-                    .setGranularity(Granularity.GRANULARITY_FINE)
-                    .setDurationMillis(CURRENT_LOCATION_REQUEST_DURATION_MILLIS).build();
-
-            final Task<Location> currentLocationTask = mLocationClient.getCurrentLocation(currentLocationRequest, null);
-            currentLocationTask.addOnSuccessListener(location -> successCallback.apply(new LatLng(location.getLatitude(), location.getLongitude())));
-            currentLocationTask.addOnFailureListener(e -> {
-                Log.e(LocationController.class.getName(), e.getMessage() != null ? e.getMessage() : "Unable to access current position!");
-                failureCallback.apply(LocationError.LOCATION_UNKNOWN);
-            });
-            return;
-        }
-
-        // Android 9+ (Fused location provider will use a number of sources to calculate accuracy - cell, wifi, bluetooth, gps etc..)
-        if (mLocationClient == null) {
+        if (mLocationClient == null || !isLocationEnabled()) {
             failureCallback.apply(LocationError.LOCATION_UNKNOWN);
             return;
         }
@@ -73,6 +69,29 @@ public class LocationController {
             return;
         }
 
+        // Android 8 and below (Fused location provider not working when device only location mode set in OS)
+        if (IS_ANDROID_8_OR_BELOW) {
+            final CurrentLocationRequest currentLocationRequest = new CurrentLocationRequest.Builder()
+                    .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                    .setGranularity(Granularity.GRANULARITY_FINE)
+                    .setDurationMillis(CURRENT_LOCATION_REQUEST_DURATION_MILLIS).build();
+
+            final Task<Location> currentLocationTask = mLocationClient.getCurrentLocation(currentLocationRequest, null);
+            currentLocationTask.addOnSuccessListener(location -> {
+                if(location == null || Double.isNaN(location.getLatitude()) || Double.isNaN(location.getLongitude())) {
+                    failureCallback.apply(LocationError.LOCATION_UNKNOWN);
+                } else {
+                    successCallback.apply(new LatLng(location.getLatitude(), location.getLongitude()));
+                }
+            });
+            currentLocationTask.addOnFailureListener(e -> {
+                Log.e(LocationController.class.getName(), e.getMessage() != null ? e.getMessage() : "Unable to access current position!");
+                failureCallback.apply(LocationError.LOCATION_UNKNOWN);
+            });
+            return;
+        }
+
+        // Android 9+ (Fused location provider will use a number of sources to calculate accuracy - cell, wifi, bluetooth, gps etc..)
         final LocationRequest locationRequest = getLocationRequest(currentPositionRequest);
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(locationRequest);
