@@ -9,6 +9,10 @@ import co.uk.hive.reactnativegeolocation.location.LocationController;
 import com.annimon.stream.Stream;
 import com.annimon.stream.function.Function;
 import com.facebook.react.bridge.*;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.GeofenceStatusCodes;
+import com.facebook.react.bridge.WritableMap;
 
 import java.util.List;
 
@@ -82,7 +86,29 @@ public class RNGeolocationModule extends ReactContextBaseJavaModule {
 
     private <T> Function<T, Object> convertCallback(Callback callback) {
         return t -> {
-            callback.invoke(t);
+            if (t instanceof ApiException) {
+                final ApiException apiException = (ApiException) t;
+                final WritableMap errorMap = Arguments.createMap();
+
+                errorMap.putString("exceptionType", t.getClass().toString());
+                errorMap.putString("message", apiException.getMessage());
+                errorMap.putString("code", String.valueOf(apiException.getStatusCode()));
+                errorMap.putString("JIRA", "MA1-1200");
+
+                callback.invoke(errorMap);
+            } else if (t instanceof Exception) {
+                final Exception exception = (Exception) t;
+                final WritableMap errorMap = Arguments.createMap();
+
+                errorMap.putString("exceptionType", t.getClass().toString());
+                errorMap.putString("message", exception.getMessage());
+                errorMap.putString("JIRA", "MA1-1200");
+
+                callback.invoke(errorMap);
+            } else {
+                callback.invoke(t);
+            }
+
             return null;
         };
     }
