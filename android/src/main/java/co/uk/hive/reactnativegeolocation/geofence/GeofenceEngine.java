@@ -32,7 +32,7 @@ public class GeofenceEngine {
         Intent intent = new Intent(context, GeofenceEventBroadcastReceiver.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             mPendingIntent = PendingIntent.getActivity(context,
-                    0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                    0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
         } else {
             mPendingIntent = PendingIntent.getActivity(context,
                     0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
