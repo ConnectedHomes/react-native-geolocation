@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 
 import com.annimon.stream.Stream;
 import com.annimon.stream.function.Function;
@@ -21,17 +22,21 @@ public class GeofenceEngine {
 
     private final GeofencingClient mGeofencingClient;
     private final PermissionChecker mPermissionChecker;
-    private final Context mContext;
-    private PendingIntent mPendingIntent;
+    private final PendingIntent mPendingIntent;
 
+    @SuppressLint("UnspecifiedImmutableFlag")
     GeofenceEngine(Context context) {
-        mContext = context;
-        mGeofencingClient = LocationServices.getGeofencingClient(mContext);
+        mGeofencingClient = LocationServices.getGeofencingClient(context);
         mPermissionChecker = new PermissionChecker(context);
 
-        Intent intent = new Intent(mContext, GeofenceEventBroadcastReceiver.class);
-        mPendingIntent = PendingIntent.getBroadcast(mContext, 0,
-                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent intent = new Intent(context, GeofenceEventBroadcastReceiver.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            mPendingIntent = PendingIntent.getActivity(context,
+                    0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        } else {
+            mPendingIntent = PendingIntent.getActivity(context,
+                    0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -60,7 +65,7 @@ public class GeofenceEngine {
                 .build();
 
         mGeofencingClient.addGeofences(
-                geofencingRequest, mPendingIntent)
+                        geofencingRequest, mPendingIntent)
                 .addOnSuccessListener(successCallback::apply)
                 .addOnFailureListener(failureCallback::apply);
     }
