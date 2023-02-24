@@ -11,12 +11,24 @@ const LocationError = {
   LOCATION_UNKNOWN: 0,
   PERMISSION_DENIED: 1,
   NETWORK_ERROR: 2,
+  LOCATION_CLIENT_IS_NULL: 3,
+  LOCATION_DISABLED: 4,
+  LOCATION_IS_NULL: 5,
+  CURRENT_LOCATION_FAILED: 6,
+  LOCATION_SETTINGS_FAILED: 7,
   LOCATION_TIMEOUT: 408,
 };
 
 export default class Geolocation extends PlatformGeolocation {
   static isLocationUnknown(error) {
-      return error === LocationError.LOCATION_UNKNOWN;
+      return [
+        LocationError.PERMISSION_DENIED,
+        LocationError.LOCATION_CLIENT_IS_NULL ,
+        LocationError.LOCATION_DISABLED ,
+        LocationError.LOCATION_IS_NULL ,
+        LocationError.CURRENT_LOCATION_FAILED ,
+        LocationError.LOCATION_SETTINGS_FAILED ,
+      ].includes(error);
   }
   
   static isPermissionDenied(error) {
