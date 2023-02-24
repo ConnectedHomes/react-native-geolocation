@@ -59,8 +59,14 @@ public class LocationController {
     public void getCurrentPosition(CurrentPositionRequest currentPositionRequest,
                                    Function<LatLng, Object> successCallback,
                                    Function<Object, Object> failureCallback) {
-        if (mLocationClient == null || !isLocationEnabled()) {
-            failureCallback.apply(LocationError.LOCATION_UNKNOWN);
+
+        if (mLocationClient == null) {
+            failureCallback.apply(LocationError.LOCATION_CLIENT_IS_NULL);
+            return;
+        }
+
+        if (!isLocationEnabled()) {
+            failureCallback.apply(LocationError.LOCATION_DISABLED);
             return;
         }
 
@@ -78,15 +84,15 @@ public class LocationController {
 
             final Task<Location> currentLocationTask = mLocationClient.getCurrentLocation(currentLocationRequest, null);
             currentLocationTask.addOnSuccessListener(location -> {
-                if(location == null || Double.isNaN(location.getLatitude()) || Double.isNaN(location.getLongitude())) {
-                    failureCallback.apply(LocationError.LOCATION_UNKNOWN);
+                if (location == null || Double.isNaN(location.getLatitude()) || Double.isNaN(location.getLongitude())) {
+                    failureCallback.apply(LocationError.LOCATION_IS_NULL);
                 } else {
                     successCallback.apply(new LatLng(location.getLatitude(), location.getLongitude()));
                 }
             });
             currentLocationTask.addOnFailureListener(e -> {
                 Log.e(LocationController.class.getName(), e.getMessage() != null ? e.getMessage() : "Unable to access current position!");
-                failureCallback.apply(LocationError.LOCATION_UNKNOWN);
+                failureCallback.apply(LocationError.CURRENT_LOCATION_FAILED);
             });
             return;
         }
@@ -98,7 +104,7 @@ public class LocationController {
         SettingsClient client = LocationServices.getSettingsClient(mContext);
 
         client.checkLocationSettings(builder.build())
-                .addOnFailureListener(TaskExecutors.MAIN_THREAD, ignored -> failureCallback.apply(LocationError.LOCATION_UNKNOWN))
+                .addOnFailureListener(TaskExecutors.MAIN_THREAD, ignored -> failureCallback.apply(LocationError.LOCATION_SETTINGS_FAILED))
                 .addOnSuccessListener(TaskExecutors.MAIN_THREAD, ignored -> requestLocation(currentPositionRequest, successCallback, failureCallback));
     }
 
