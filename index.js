@@ -32,7 +32,11 @@ export default class Geolocation extends PlatformGeolocation {
   }
   
   static isPermissionDenied(error) {
-      return error === LocationError.PERMISSION_DENIED;
+    return error === LocationError.PERMISSION_DENIED;
+  }
+
+  static isLocationDisabled(error) {
+    return error === LocationError.LOCATION_DISABLED;
   }
 
   static isNetworkError(error) {
