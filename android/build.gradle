@@ -58,11 +58,16 @@ repositories {
 }
 
 dependencies {
+    def work_version = "2.7.0"
     def googlePlayServicesLocationVersion = project.hasProperty('googlePlayServicesLocationVersion') ? project.googlePlayServicesLocationVersion : DEFAULT_GOOGLE_PLAY_SERVICES_LOCATION_VERSION
     implementation 'com.facebook.react:react-native:+'
     implementation "com.google.android.gms:play-services-location:$googlePlayServicesLocationVersion"
     implementation 'com.annimon:stream:1.1.8'
     implementation 'com.google.code.gson:gson:2.8.5'
+    implementation ("androidx.work:work-runtime-ktx:$work_version") {
+        force = true
+    }
+    implementation("androidx.concurrent:concurrent-futures-ktx:1.1.0")
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-core:2.13.0'
 }
