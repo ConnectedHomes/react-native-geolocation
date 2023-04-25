@@ -52,6 +52,7 @@ public class GeofenceController {
         }
     }
 
+    // TODO: Add debug JS bridge function to return this to the app
     private List<String> getGeofenceIds() {
         return Stream.of(mGeofenceRepository.getGeofences())
                 .map(Geofence::getId)
