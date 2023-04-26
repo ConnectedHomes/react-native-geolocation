@@ -16,6 +16,7 @@ import com.facebook.react.ReactNativeHost;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingEvent;
+import co.uk.hive.reactnativegeolocation.geofence.GeofenceEventWorker;
 
 public class GeofenceEventBroadcastReceiver extends BroadcastReceiver {
     private static final String TAG = GeofenceEventBroadcastReceiver.class.getSimpleName();
@@ -71,6 +72,7 @@ public class GeofenceEventBroadcastReceiver extends BroadcastReceiver {
 
     private void runHeadlessJsTask(Context context, PersistableBundle bundle) {
         //GeofenceHeadlessJsTaskService.start(context, bundle);
-        GeofenceEventWorker.Companion.enqueueGeoEvent(context, bundle);
+        //GeofenceEventWorker.enqueueGeoEvent(context, bundle);
+        GeofenceEventWorker.enqueueGeoEvent(context, bundle);
     }
 }

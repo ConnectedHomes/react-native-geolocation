@@ -17,7 +17,7 @@ class GeofenceEventWorker(
         private const val HEADLESS_TASK_NAME = "GeofenceEventTask"
         private const val HEADLESS_TASK_ARGUMENT_NAME = "geofence"
 
-        fun enqueueGeoEvent(mContext: Context, bundle: PersistableBundle) {
+        @JvmStatic fun enqueueGeoEvent(mContext: Context, bundle: PersistableBundle) {
             val dataBuilder = Data.Builder()
             bundle.keySet().forEach {
                 dataBuilder.putString(it, bundle.getString(it))
