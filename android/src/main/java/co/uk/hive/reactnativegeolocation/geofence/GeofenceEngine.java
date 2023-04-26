@@ -85,6 +85,7 @@ public class GeofenceEngine {
     }
 
     private int defineInitialTrigger() {
-        return 0; // do not notify at the moment of setting the geofence
+        //return 0; // do not notify at the moment of setting the geofence
+        return GeofencingRequest.INITIAL_TRIGGER_DWELL;
     }
 }

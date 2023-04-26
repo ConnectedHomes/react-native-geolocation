@@ -70,6 +70,7 @@ public class GeofenceEventBroadcastReceiver extends BroadcastReceiver {
     }
 
     private void runHeadlessJsTask(Context context, PersistableBundle bundle) {
-        GeofenceHeadlessJsTaskService.start(context, bundle);
+        //GeofenceHeadlessJsTaskService.start(context, bundle);
+        GeofenceEventWorker.Companion.enqueueGeoEvent(context, bundle);
     }
 }

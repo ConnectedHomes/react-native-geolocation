@@ -30,7 +30,7 @@ class GeofenceEventWorker(
                     .build())
         }
     }
-
+    // TODO: TEST/DEBUG!!!
     override fun getTaskConfig(data: Data?): HeadlessJsTaskConfig? {
         val geoMap = mapOf("name" to HEADLESS_TASK_ARGUMENT_NAME, "params" to data?.keyValueMap)
         if (data != null) {
