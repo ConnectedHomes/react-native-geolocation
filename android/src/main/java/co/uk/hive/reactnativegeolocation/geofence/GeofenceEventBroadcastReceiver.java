@@ -16,7 +16,6 @@ import com.facebook.react.ReactNativeHost;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingEvent;
-import co.uk.hive.reactnativegeolocation.geofence.GeofenceEventWorker;
 
 public class GeofenceEventBroadcastReceiver extends BroadcastReceiver {
     private static final String TAG = GeofenceEventBroadcastReceiver.class.getSimpleName();

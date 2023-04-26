@@ -1,10 +1,16 @@
 buildscript {
+    def DEFAULT_KOTLIN_VERSION = '1.6.0'
+    ext.kotlin_version = project.ext.has("kotlin_version") ? project.ext.get("kotlin_version") : DEFAULT_KOTLIN_VERSION
     repositories {
-        google()
         mavenCentral()
+        google()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.2.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
@@ -14,17 +20,31 @@ allprojects {
             // All of React Native (JS, Android binaries) is installed from npm
             url "$rootDir/../node_modules/react-native/android"
         }
-        google()
         mavenCentral()
+        google()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 def DEFAULT_COMPILE_SDK_VERSION = 31
 def DEFAULT_BUILD_TOOLS_VERSION = "30.0.2"
 def DEFAULT_TARGET_SDK_VERSION = 31
 def DEFAULT_GOOGLE_PLAY_SERVICES_LOCATION_VERSION = "+"
+
+def safeExtGet(prop, fallback) {
+    def retValue = rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+    return retValue
+}
+
+def getExtOrDefault(name, fallback) {
+    return rootProject.ext.has(name) ? rootProject.ext.get(name) : fallback
+}
 
 android {
     compileSdkVersion project.hasProperty('compileSdkVersion') ? project.compileSdkVersion : DEFAULT_COMPILE_SDK_VERSION
@@ -55,12 +75,30 @@ android {
 
 repositories {
     mavenCentral()
+    google()
+    maven {
+        url "https://plugins.gradle.org/m2/"
+    }
 }
+
+def DEFAULT_KOTLIN_VERSION = '1.6.0'
+def kotlin_version = getExtOrDefault('kotlinVersion', DEFAULT_KOTLIN_VERSION)
 
 dependencies {
     def work_version = "2.7.0"
     def googlePlayServicesLocationVersion = project.hasProperty('googlePlayServicesLocationVersion') ? project.googlePlayServicesLocationVersion : DEFAULT_GOOGLE_PLAY_SERVICES_LOCATION_VERSION
-    implementation 'com.facebook.react:react-native:+'
+    implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
+    //implementation 'com.facebook.react:react-native:0.67.5!!'
+    //implementation("com.facebook.react:react-native:+")
+//    constraints {
+//        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
+//            because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")
+//        }
+//        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0") {
+//            because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
+//        }
+//    }
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "com.google.android.gms:play-services-location:$googlePlayServicesLocationVersion"
     implementation 'com.annimon:stream:1.1.8'
     implementation 'com.google.code.gson:gson:2.8.5'
