@@ -30,7 +30,7 @@ public class GeofenceEngine {
         mGeofencingClient = LocationServices.getGeofencingClient(context);
         mPermissionChecker = new PermissionChecker(context);
 
-        Intent intent = new Intent(context, GeofenceEventBroadcastReceiver.class);
+        final Intent intent = new Intent(context, GeofenceEventBroadcastReceiver.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             mPendingIntent = PendingIntent.getActivity(context,
                     0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
@@ -69,7 +69,8 @@ public class GeofenceEngine {
                 .addGeofences(geofences)
                 .setInitialTrigger(defineInitialTrigger())
                 .build();
-
+        // TODO: Add proper error listeneres incase something useful comes back...
+        // See: https://www.kodeco.com/7372-geofencing-api-tutorial-for-android
         mGeofencingClient.addGeofences(
                         geofencingRequest, mPendingIntent)
                 .addOnSuccessListener(successCallback::apply)
