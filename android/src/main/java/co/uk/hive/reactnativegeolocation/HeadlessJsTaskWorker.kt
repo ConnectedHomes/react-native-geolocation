@@ -2,6 +2,7 @@ package co.uk.hive.reactnativegeolocation
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.work.Data
 import androidx.work.ForegroundInfo
@@ -42,8 +43,10 @@ abstract class HeadlessJsTaskWorker(
             val taskConfig = getTaskConfig(this.inputData)
             mCompleter = completer
             if (taskConfig != null) {
+                Log.d("Geofence", "HeadlessJsTaskWorker::startWork: $taskConfig")
                 startTask(taskConfig)
             } else {
+                Log.e("Geofence", "HeadlessJsTaskWorker::startWork: No task config defined!")
                 mCompleter!!.set(Result.failure())
             }
         }
@@ -51,7 +54,7 @@ abstract class HeadlessJsTaskWorker(
 
     protected abstract fun getTaskConfig(data: Data?): HeadlessJsTaskConfig?
 
-    protected fun startTask(taskConfig: HeadlessJsTaskConfig) {
+    private fun startTask(taskConfig: HeadlessJsTaskConfig) {
         val reactInstanceManager = reactNativeHost.reactInstanceManager
         val reactContext = reactInstanceManager.currentReactContext
         if (reactContext == null) {
@@ -77,6 +80,7 @@ abstract class HeadlessJsTaskWorker(
     private fun invokeStartTask(reactContext: ReactContext, taskConfig: HeadlessJsTaskConfig) {
         val headlessJsTaskContext = HeadlessJsTaskContext.getInstance(reactContext)
         headlessJsTaskContext.addTaskEventListener(this)
+        Log.d("Geofence", "HeadlessJsTaskWorker::invokeStartTask: $taskConfig")
         UiThreadUtil.runOnUiThread { taskId = headlessJsTaskContext.startTask(taskConfig) }
     }
 
@@ -106,6 +110,6 @@ abstract class HeadlessJsTaskWorker(
         }
     }
 
-    protected val reactNativeHost: ReactNativeHost
-        protected get() = (this.applicationContext as ReactApplication).reactNativeHost
+    private val reactNativeHost: ReactNativeHost
+        get() = (this.applicationContext as ReactApplication).reactNativeHost
 }

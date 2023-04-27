@@ -31,6 +31,7 @@ public class GeofenceController {
             return;
         }
         mGeofenceActivator.setGeofencesActivated(true);
+        Log.d("Geofence", "GeofenceController::start: " + mGeofenceRepository.getGeofences().toString());
         mGeofenceEngine.addGeofences(mGeofenceRepository.getGeofences(), successCallback, failureCallback);
     }
 
@@ -42,6 +43,7 @@ public class GeofenceController {
         mGeofenceActivator.setGeofencesActivated(false);
         List<String> geofenceIds = getGeofenceIds();
         if (!geofenceIds.isEmpty()) {
+            Log.d("Geofence", "GeofenceController::removeGeofences: " + geofenceIds.toString());
             mGeofenceEngine.removeGeofences(geofenceIds, successCallback, failureCallback);
         }
     }
@@ -60,10 +62,12 @@ public class GeofenceController {
     }
 
     public void addGeofences(List<Geofence> geofences) {
+        Log.d("Geofence", "GeofenceController::addGeofences: " + geofences.toString());
         mGeofenceRepository.addGeofences(geofences);
     }
 
     public void removeAllGeofences() {
+        Log.d("Geofence", "GeofenceController::removeAllGeofences");
         mGeofenceRepository.removeAllGeofences();
     }
 

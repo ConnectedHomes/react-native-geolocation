@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import co.uk.hive.reactnativegeolocation.geofence.Geofence;
@@ -58,6 +59,7 @@ public class RNGeolocationModule extends ReactContextBaseJavaModule implements A
 
     @ReactMethod
     public void startGeofences(Callback successCallback, Callback failureCallback) {
+        Log.d("Geofence", "RNGeolocationModule::startGeofences!");
         mGeofenceController.start(convertCallback(successCallback), convertCallback(failureCallback));
         ReactNativeHost reactNativeHost = ((ReactApplication) this.reactContext.getApplicationContext()).getReactNativeHost();
         ReactInstanceManager reactInstanceManager = reactNativeHost.getReactInstanceManager();
@@ -68,11 +70,13 @@ public class RNGeolocationModule extends ReactContextBaseJavaModule implements A
 
     @ReactMethod
     public void stopGeofences(Callback successCallback, Callback failureCallback) {
+        Log.d("Geofence", "RNGeolocationModule::stopGeofences!");
         mGeofenceController.stop(convertCallback(successCallback), convertCallback(failureCallback));
     }
 
     @ReactMethod
     public void addGeofences(ReadableArray geofencesArray) {
+        Log.d("Geofence", "RNGeolocationModule::addGeofences: " + geofencesArray.toString());
         List<Geofence> geofences = Stream.range(0, geofencesArray.size())
                 .map(geofencesArray::getMap)
                 .map(mRnMapper::readGeofence)
@@ -82,6 +86,7 @@ public class RNGeolocationModule extends ReactContextBaseJavaModule implements A
 
     @ReactMethod
     public void removeGeofences() {
+        Log.d("Geofence", "RNGeolocationModule::removeGeofences");
         mGeofenceController.removeAllGeofences();
     }
 
@@ -92,6 +97,7 @@ public class RNGeolocationModule extends ReactContextBaseJavaModule implements A
             successCallback.invoke(mRnMapper.writeLocation(location));
             return null;
         };
+        Log.d("Geofence", "RNGeolocationModule::getCurrentPosition: " + currentPositionRequest.toString());
         mLocationController.getCurrentPosition(
                 mRnMapper.readPositionRequest(currentPositionRequest), positionCallback, convertCallback(failureCallback));
 
@@ -103,7 +109,7 @@ public class RNGeolocationModule extends ReactContextBaseJavaModule implements A
     public void isLocationEnabled(Promise promise) {
         final boolean locationEnabled = new LocationServicesChecker(getReactApplicationContext())
                 .isLocationEnabled();
-
+        Log.d("Geofence", "RNGeolocationModule::locationEnabled: " + locationEnabled);
         promise.resolve(locationEnabled);
     }
 
@@ -117,6 +123,7 @@ public class RNGeolocationModule extends ReactContextBaseJavaModule implements A
                         // Location settings are not satisfied. But could be fixed by showing the
                         // user a dialog.
                         // TODO: Callback to module somehow... broadcast? Start activity for result from there and use activitylistener!
+                        Log.e("Geofence", "RNGeolocationModule::RESOLUTION_REQUIRED");
                         try {
                             // Cast to a resolvable exception.
                             final ResolvableApiException resolvable = (ResolvableApiException) apiException;
@@ -134,6 +141,7 @@ public class RNGeolocationModule extends ReactContextBaseJavaModule implements A
                     }
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE: {
                         // TODO: Test cancelling or check which devices/os don't have the accuracy thingy
+                        Log.e("Geofence", "RNGeolocationModule::SETTINGS_CHANGE_UNAVAILABLE");
                         Toast.makeText(getReactApplicationContext(), "SETTINGS_CHANGE_UNAVAILABLE!", Toast.LENGTH_SHORT).show();
                         break;
                     }

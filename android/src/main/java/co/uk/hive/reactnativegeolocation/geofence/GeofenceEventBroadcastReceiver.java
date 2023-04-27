@@ -28,6 +28,7 @@ public class GeofenceEventBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.d("Geofence", "GeofenceEventBroadcastReceiver::onReceive: " + intent.toString());
         if (mGeofenceController == null) {
             mGeofenceController = GeofenceServiceLocator.getGeofenceController(context.getApplicationContext());
         }
@@ -54,6 +55,7 @@ public class GeofenceEventBroadcastReceiver extends BroadcastReceiver {
     private void sendEvent(Context context, Geofence geofence, GeofencingEvent event) {
         long timestamp = System.currentTimeMillis() / 1000;
         PersistableBundle bundle = mGeofenceMapper.toBundle(event, geofence, timestamp);
+        Log.d("Geofence", "GeofenceEventBroadcastReceiver::sendEvent::isAppInForeground: " + mForegroundChecker.isAppInForeground());
         if (mForegroundChecker.isAppInForeground()) {
             emitRNEvent(context, bundle);
         } else {
@@ -65,6 +67,7 @@ public class GeofenceEventBroadcastReceiver extends BroadcastReceiver {
         ReactNativeHost reactNativeHost = ((ReactApplication) context.getApplicationContext()).getReactNativeHost();
         ReactInstanceManager reactInstanceManager = reactNativeHost.getReactInstanceManager();
         //noinspection ConstantConditions
+        Log.d("Geofence", "GeofenceEventBroadcastReceiver::emitRNEvent: " + bundle.toString());
         reactInstanceManager.getCurrentReactContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit(GEOFENCE_EVENT_NAME, mRnMapper.fromBundle(new Bundle(bundle)));
     }
@@ -72,6 +75,7 @@ public class GeofenceEventBroadcastReceiver extends BroadcastReceiver {
     private void runHeadlessJsTask(Context context, PersistableBundle bundle) {
         //GeofenceHeadlessJsTaskService.start(context, bundle);
         //GeofenceEventWorker.enqueueGeoEvent(context, bundle);
+        Log.d("Geofence", "GeofenceEventBroadcastReceiver::runHeadlessJsTask: " + bundle.toString());
         GeofenceEventWorker.enqueueGeoEvent(context, bundle);
     }
 }

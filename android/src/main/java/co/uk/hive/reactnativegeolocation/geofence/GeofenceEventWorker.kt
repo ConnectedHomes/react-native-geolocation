@@ -2,6 +2,7 @@ package co.uk.hive.reactnativegeolocation.geofence
 
 import android.content.Context
 import android.os.PersistableBundle
+import android.util.Log
 import androidx.annotation.NonNull
 import androidx.work.*
 import co.uk.hive.reactnativegeolocation.HeadlessJsTaskWorker
@@ -18,11 +19,12 @@ class GeofenceEventWorker(
         private const val HEADLESS_TASK_ARGUMENT_NAME = "geofence"
 
         @JvmStatic fun enqueueGeoEvent(mContext: Context, bundle: PersistableBundle) {
+            Log.d("Geofence", "GeofenceEventWorker::enqueueGeoEvent: $bundle")
             val dataBuilder = Data.Builder()
             bundle.keySet().forEach {
                 dataBuilder.putString(it, bundle.getString(it))
             }
-
+            Log.d("Geofence", "GeofenceEventWorker::enqueueGeoEvent: ${dataBuilder.build()}")
             WorkManager.getInstance(mContext).enqueue(
                 OneTimeWorkRequest.Builder(GeofenceEventWorker::class.java)
                     .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
@@ -33,6 +35,7 @@ class GeofenceEventWorker(
     // TODO: TEST/DEBUG!!!
     override fun getTaskConfig(data: Data?): HeadlessJsTaskConfig? {
         val geoMap = mapOf("name" to HEADLESS_TASK_ARGUMENT_NAME, "params" to data?.keyValueMap)
+        Log.d("Geofence", "GeofenceEventWorker::getTaskConfig: $geoMap")
         if (data != null) {
             return HeadlessJsTaskConfig(
                 HEADLESS_TASK_NAME,

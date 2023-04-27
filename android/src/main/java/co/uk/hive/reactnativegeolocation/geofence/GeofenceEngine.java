@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.util.Log;
 
 import com.annimon.stream.Stream;
 import com.annimon.stream.function.Function;
@@ -43,9 +44,13 @@ public class GeofenceEngine {
     public void addGeofences(List<Geofence> geofenceRequests, Function<? super Object, ? super Object> successCallback,
                              Function<? super Object, ? super Object> failureCallback) {
         if (!mPermissionChecker.isFullLocationPermissionGranted()) {
-            throw new IllegalStateException("All-the-time location access needs to be granted before calling addGeofences");
+            // TODO: Return coded error to the app if all the time permissions are not granted
+            final String errorMessage = "All-the-time location access needs to be granted before calling addGeofences";
+            Log.e("Geofence", errorMessage);
+            throw new IllegalStateException(errorMessage);
         }
 
+        Log.d("Geofence", "addGeofences: " + geofenceRequests.toString());
         List<com.google.android.gms.location.Geofence> geofences = Stream.of(geofenceRequests)
                 .map(geofence -> new com.google.android.gms.location.Geofence.Builder()
                         .setRequestId(geofence.getId())
@@ -73,6 +78,7 @@ public class GeofenceEngine {
 
     public void removeGeofences(List<String> geofenceIds, Function<? super Object, ? super Object> successCallback,
                                 Function<? super Object, ? super Object> failureCallback) {
+        Log.d("Geofence", "removeGeofences: " + geofenceIds.toString());
         mGeofencingClient.removeGeofences(geofenceIds)
                 .addOnSuccessListener(successCallback::apply)
                 .addOnFailureListener(failureCallback::apply);
@@ -85,7 +91,7 @@ public class GeofenceEngine {
     }
 
     private int defineInitialTrigger() {
-        //return 0; // do not notify at the moment of setting the geofence
-        return GeofencingRequest.INITIAL_TRIGGER_DWELL;
+        return 0; // do not notify at the moment of setting the geofence
+        //return GeofencingRequest.INITIAL_TRIGGER_DWELL;
     }
 }
