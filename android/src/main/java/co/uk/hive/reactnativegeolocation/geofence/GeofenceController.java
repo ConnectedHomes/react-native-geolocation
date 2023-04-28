@@ -75,6 +75,7 @@ public class GeofenceController {
         return mGeofenceRepository.getGeofenceById(id);
     }
 
+    // TODO: Test new implementation on O and/or port over re-registration
     public void setupReregistration() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             mReRegistrationScheduler.scheduleReRegistration();

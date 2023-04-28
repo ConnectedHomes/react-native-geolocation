@@ -27,6 +27,7 @@ import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.function.Function;
 
 import co.uk.hive.reactnativegeolocation.location.LatLng;
 
@@ -39,6 +40,8 @@ import co.uk.hive.reactnativegeolocation.location.LatLng;
  * the ACCESS_FINE_LOCATION permission, as specified in AndroidManifest.xml.
  * <p>
  */
+// TODO: How are geofences re-regsitered on app restart etc....?
+// See: https://github.com/b3nk4n/GeoFencer/blob/master/app/src/main/java/de/bsautermeister/geofencer/geo/PlayGeofenceProvider.java
 public class MainActivity extends AppCompatActivity implements OnCompleteListener<Void> {
 
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -55,23 +58,25 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     /**
      * Provides access to the Geofencing API.
      */
-    private GeofencingClient mGeofencingClient;
+    //private GeofencingClient mGeofencingClient;
 
     /**
      * The list of geofences used in this sample.
      */
-    private ArrayList<Geofence> mGeofenceList;
+    //private ArrayList<Geofence> mGeofenceList;
 
     /**
      * Used when requesting to add or remove geofences.
      */
-    private PendingIntent mGeofencePendingIntent;
+//    private PendingIntent mGeofencePendingIntent;
 
     // Buttons for kicking off the process of adding or removing geofences.
     private Button mAddGeofencesButton;
     private Button mRemoveGeofencesButton;
 
     private PendingGeofenceTask mPendingGeofenceTask = PendingGeofenceTask.NONE;
+
+    private GeoFenceController mGeoFenceController;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -83,17 +88,21 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         mRemoveGeofencesButton = (Button) findViewById(R.id.remove_geofences_button);
 
         // Empty list for storing geofences.
-        mGeofenceList = new ArrayList<>();
+        //mGeofenceList = new ArrayList<>();
 
         // Initially set the PendingIntent used in addGeofences() and removeGeofences() to null.
-        mGeofencePendingIntent = null;
+        //mGeofencePendingIntent = null;
 
         setButtonsEnabledState();
 
         // Get the geofences used. Geofence data is hard coded in this sample.
-        populateGeofenceList();
+        //populateGeofenceList();
 
-        mGeofencingClient = LocationServices.getGeofencingClient(this);
+        //mGeofencingClient = LocationServices.getGeofencingClient(this);
+        mGeoFenceController = new GeoFenceController(this);
+
+        // TODO: Populate properly!
+        mGeoFenceController.addGeofences(new ArrayList<>());
     }
 
     @Override
@@ -111,20 +120,20 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
      * Builds and returns a GeofencingRequest. Specifies the list of geofences to be monitored.
      * Also specifies how the geofence notifications are initially triggered.
      */
-    private GeofencingRequest getGeofencingRequest() {
-        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
-
-        // The INITIAL_TRIGGER_ENTER flag indicates that geofencing service should trigger a
-        // GEOFENCE_TRANSITION_ENTER notification when the geofence is added and if the device
-        // is already inside that geofence.
-        builder.setInitialTrigger(0);
-
-        // Add the geofences to be monitored by geofencing service.
-        builder.addGeofences(mGeofenceList);
-
-        // Return a GeofencingRequest.
-        return builder.build();
-    }
+//    private GeofencingRequest getGeofencingRequest() {
+//        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+//
+//        // The INITIAL_TRIGGER_ENTER flag indicates that geofencing service should trigger a
+//        // GEOFENCE_TRANSITION_ENTER notification when the geofence is added and if the device
+//        // is already inside that geofence.
+//        builder.setInitialTrigger(0);
+//
+//        // Add the geofences to be monitored by geofencing service.
+//        builder.addGeofences(mGeofenceList);
+//
+//        // Return a GeofencingRequest.
+//        return builder.build();
+//    }
 
     /**
      * Adds geofences, which sets alerts to be notified when the device enters or exits one of the
@@ -151,8 +160,11 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
             return;
         }
 
-        mGeofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
-                .addOnCompleteListener(this);
+//        mGeofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
+//                .addOnCompleteListener(this);
+
+        // TODO: Wire up proper callbacks + error handling
+        mGeoFenceController.start(success -> null, failure -> null);
     }
 
     /**
@@ -179,7 +191,8 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
             return;
         }
 
-        mGeofencingClient.removeGeofences(getGeofencePendingIntent()).addOnCompleteListener(this);
+        //mGeofencingClient.removeGeofences(getGeofencePendingIntent()).addOnCompleteListener(this);
+        mGeoFenceController.removeAllGeofences();
     }
 
     /**
@@ -211,65 +224,65 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
      *
      * @return A PendingIntent for the IntentService that handles geofence transitions.
      */
-    private PendingIntent getGeofencePendingIntent() {
-        // Reuse the PendingIntent if we already have it.
-        if (mGeofencePendingIntent != null) {
-            return mGeofencePendingIntent;
-        }
-        Intent intent = new Intent(this, GeofenceBroadcastReceiver.class);
-        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
-        // addGeofences() and removeGeofences().
-        // TODO: Add pre S compatibility!
-        mGeofencePendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
-
-        // TODO: Investigate any re-registration required (Android O quirks/requirements?)
-        return mGeofencePendingIntent;
-    }
+//    private PendingIntent getGeofencePendingIntent() {
+//        // Reuse the PendingIntent if we already have it.
+//        if (mGeofencePendingIntent != null) {
+//            return mGeofencePendingIntent;
+//        }
+//        Intent intent = new Intent(this, GeofenceBroadcastReceiver.class);
+//        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
+//        // addGeofences() and removeGeofences().
+//        // TODO: Add pre S compatibility!
+//        mGeofencePendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+//
+//        // TODO: Investigate any re-registration required (Android O quirks/requirements?)
+//        return mGeofencePendingIntent;
+//    }
 
     /**
      * This sample hard codes geofence data. A real app might dynamically create geofences based on
      * the user's location.
      */
-    private void populateGeofenceList() {
-        for (Map.Entry<String, LatLng> entry : Constants.GEO_FENCE_LANDMARKS.entrySet()) {
-
-            int transition = 0;
-            switch (entry.getKey()){
-                case "ARRIVING": {
-                    transition = Geofence.GEOFENCE_TRANSITION_ENTER;
-                    break;
-                }
-                case "LEAVING": {
-                    transition = Geofence.GEOFENCE_TRANSITION_EXIT;
-                    break;
-                }
-            }
-
-            mGeofenceList.add(new Geofence.Builder()
-                    // Set the request ID of the geofence. This is a string to identify this
-                    // geofence.
-                    .setRequestId(entry.getKey())
-
-                    // Set the circular region of this geofence.
-                    .setCircularRegion(
-                            entry.getValue().getLatitude(),
-                            entry.getValue().getLongitude(),
-                            Constants.GEOFENCE_RADIUS_IN_METERS
-                    )
-
-                    // Set the expiration duration of the geofence. This geofence gets automatically
-                    // removed after this period of time.
-                    // TODO: Set to never Geofence.NEVER_EXPIRE
-                    .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
-
-                    // Set the transition types of interest. Alerts are only generated for these
-                    // transition. We track entry and exit transitions in this sample.
-                    .setTransitionTypes(transition)
-
-                    // Create the geofence.
-                    .build());
-        }
-    }
+//    private void populateGeofenceList() {
+//        for (Map.Entry<String, LatLng> entry : Constants.GEO_FENCE_LANDMARKS.entrySet()) {
+//
+//            int transition = 0;
+//            switch (entry.getKey()){
+//                case "ARRIVING": {
+//                    transition = Geofence.GEOFENCE_TRANSITION_ENTER;
+//                    break;
+//                }
+//                case "LEAVING": {
+//                    transition = Geofence.GEOFENCE_TRANSITION_EXIT;
+//                    break;
+//                }
+//            }
+//
+//            mGeofenceList.add(new Geofence.Builder()
+//                    // Set the request ID of the geofence. This is a string to identify this
+//                    // geofence.
+//                    .setRequestId(entry.getKey())
+//
+//                    // Set the circular region of this geofence.
+//                    .setCircularRegion(
+//                            entry.getValue().getLatitude(),
+//                            entry.getValue().getLongitude(),
+//                            Constants.GEOFENCE_RADIUS_IN_METERS
+//                    )
+//
+//                    // Set the expiration duration of the geofence. This geofence gets automatically
+//                    // removed after this period of time.
+//                    // TODO: Set to never Geofence.NEVER_EXPIRE
+//                    .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+//
+//                    // Set the transition types of interest. Alerts are only generated for these
+//                    // transition. We track entry and exit transitions in this sample.
+//                    .setTransitionTypes(transition)
+//
+//                    // Create the geofence.
+//                    .build());
+//        }
+//    }
 
     /**
      * Ensures that only one button is enabled at any time. The Add Geofences button is enabled

@@ -49,6 +49,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
      */
     @Override
     protected void onHandleWork(Intent intent) {
+        // TODO: Intent is null after device restart, before app launch...
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
         if (geofencingEvent.hasError()) {
             String errorMessage = GeofenceErrorMessages.getErrorString(this,
