@@ -63,7 +63,7 @@ public class RNGeolocationModule extends ReactContextBaseJavaModule implements A
 
     @ReactMethod
     public void ready() {
-        mGeofenceController.setupReregistration();
+        //mGeofenceController.setupReregistration();
     }
 
     @ReactMethod
