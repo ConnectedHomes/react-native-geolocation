@@ -17,6 +17,7 @@ import java.util.List;
 
 import static com.google.android.gms.location.Geofence.*;
 
+import co.uk.hive.reactnativegeolocation.geofence.GeofenceBroadcastReceiver;
 import co.uk.hive.reactnativegeolocation.util.PermissionChecker;
 
 public class GeofenceEngine {
@@ -30,7 +31,8 @@ public class GeofenceEngine {
         mGeofencingClient = LocationServices.getGeofencingClient(context);
         mPermissionChecker = new PermissionChecker(context);
 
-        final Intent intent = new Intent(context, GeofenceEventBroadcastReceiver.class);
+        //final Intent intent = new Intent(context, GeofenceEventBroadcastReceiver.class);
+        final Intent intent = new Intent(context, GeofenceBroadcastReceiver.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             mPendingIntent = PendingIntent.getActivity(context,
                     0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);

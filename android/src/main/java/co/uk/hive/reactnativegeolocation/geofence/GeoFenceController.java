@@ -1,4 +1,4 @@
-package co.uk.hive.reactnativegeolocation.sample_app;
+package co.uk.hive.reactnativegeolocation.geofence;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -122,7 +122,7 @@ public class GeoFenceController implements IGeoFenceController {
     public void start(Function<? super Object, ? super Object> successCallback, Function<? super Object, ? super Object> failureCallback) {
         // TODO: Pull geofences from repo and pass to addGeofences
         if (!checkPermissions()) {
-            Toast.makeText(mContext, mContext.getString(R.string.insufficient_permissions), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "Insufficient permissions.", Toast.LENGTH_SHORT).show();
             return;
         }
         mGeofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent(mContext))
@@ -147,7 +147,7 @@ public class GeoFenceController implements IGeoFenceController {
     @Override
     public void removeAllGeofences() {
         if (!checkPermissions()) {
-            Toast.makeText(mContext, mContext.getString(R.string.insufficient_permissions), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "Insufficient permissions.", Toast.LENGTH_SHORT).show();
             return;
         }
         // TODO: Add success/complete/failure listeners

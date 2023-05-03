@@ -1,10 +1,12 @@
-package co.uk.hive.reactnativegeolocation.sample_app;
+package co.uk.hive.reactnativegeolocation.geofence;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
 import java.util.ArrayList;
+
+import co.uk.hive.reactnativegeolocation.geofence.GeoFenceController;
 
 public class GeofenceRestartReceiver extends BroadcastReceiver {
     private static final String TAG = "GeoRestartReceiver";

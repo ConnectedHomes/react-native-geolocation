@@ -1,8 +1,10 @@
-package co.uk.hive.reactnativegeolocation.sample_app;
+package co.uk.hive.reactnativegeolocation.geofence;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+
+import co.uk.hive.reactnativegeolocation.geofence.GeofenceTransitionsWorker;
 
 /**
  * Receiver for geofence transition changes.

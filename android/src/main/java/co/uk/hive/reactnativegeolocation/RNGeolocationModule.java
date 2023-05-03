@@ -8,6 +8,28 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.annimon.stream.Stream;
+import com.annimon.stream.function.Function;
+import com.facebook.react.ReactApplication;
+import com.facebook.react.ReactInstanceManager;
+import com.facebook.react.ReactNativeHost;
+import com.facebook.react.bridge.ActivityEventListener;
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContextBaseJavaModule;
+import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+
+import java.util.List;
+
 import co.uk.hive.reactnativegeolocation.data.RNMapper;
 import co.uk.hive.reactnativegeolocation.geofence.legacy.Geofence;
 import co.uk.hive.reactnativegeolocation.geofence.legacy.GeofenceController;
@@ -15,20 +37,6 @@ import co.uk.hive.reactnativegeolocation.geofence.legacy.GeofenceServiceLocator;
 import co.uk.hive.reactnativegeolocation.location.LatLng;
 import co.uk.hive.reactnativegeolocation.location.LocationController;
 import co.uk.hive.reactnativegeolocation.util.LocationServicesChecker;
-
-import com.annimon.stream.Stream;
-import com.annimon.stream.function.Function;
-import com.facebook.react.ReactApplication;
-import com.facebook.react.ReactInstanceManager;
-import com.facebook.react.ReactNativeHost;
-import com.facebook.react.bridge.*;
-import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.ResolvableApiException;
-import com.facebook.react.bridge.WritableMap;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
-
-import java.util.List;
 
 public class RNGeolocationModule extends ReactContextBaseJavaModule implements ActivityEventListener {
 
@@ -65,8 +73,8 @@ public class RNGeolocationModule extends ReactContextBaseJavaModule implements A
         ReactNativeHost reactNativeHost = ((ReactApplication) this.reactContext.getApplicationContext()).getReactNativeHost();
         ReactInstanceManager reactInstanceManager = reactNativeHost.getReactInstanceManager();
         //noinspection ConstantConditions
-        reactInstanceManager.getCurrentReactContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                .emit("geofence", mRnMapper.fromBundle(new Bundle()));
+//        reactInstanceManager.getCurrentReactContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+//                .emit("geofence", mRnMapper.fromBundle(new Bundle()));
     }
 
     @ReactMethod

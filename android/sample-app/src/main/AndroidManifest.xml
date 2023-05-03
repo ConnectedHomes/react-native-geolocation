@@ -30,24 +30,6 @@
             </intent-filter>
         </activity>
 
-        <receiver
-            android:name=".GeofenceBroadcastReceiver"
-            android:enabled="true"
-            android:exported="false" />
-
-        <receiver
-            android:name=".GeofenceRestartReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
-                <action android:name="android.location.MODE_CHANGED" />
-                <action android:name="android.location.PROVIDERS_CHANGED" />
-            </intent-filter>
-        </receiver>
-
 <!--        <service-->
 <!--            android:name=".GeofenceTransitionsJobIntentService"-->
 <!--            android:exported="true"-->

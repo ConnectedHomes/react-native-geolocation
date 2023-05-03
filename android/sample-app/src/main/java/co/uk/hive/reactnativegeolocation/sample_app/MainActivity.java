@@ -2,7 +2,6 @@ package co.uk.hive.reactnativegeolocation.sample_app;
 
 
 import android.Manifest;
-import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -18,18 +17,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofencingClient;
-import com.google.android.gms.location.GeofencingRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.function.Function;
 
-import co.uk.hive.reactnativegeolocation.location.LatLng;
+import co.uk.hive.reactnativegeolocation.geofence.Constants;
+import co.uk.hive.reactnativegeolocation.geofence.GeoFenceController;
+import co.uk.hive.reactnativegeolocation.geofence.GeofenceErrorMessages;
 
 /**
  * Demonstrates how to create and remove geofences using the GeofencingApi. Uses an IntentService
@@ -435,14 +430,14 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
                             @Override
                             public void onClick(View view) {
                                 // Build intent that displays the App settings screen.
-                                Intent intent = new Intent();
-                                intent.setAction(
-                                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                Uri uri = Uri.fromParts("package",
-                                        BuildConfig.APPLICATION_ID, null);
-                                intent.setData(uri);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(intent);
+//                                Intent intent = new Intent();
+//                                intent.setAction(
+//                                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+//                                Uri uri = Uri.fromParts("package",
+//                                        BuildConfig.APPLICATION_ID, null);
+//                                intent.setData(uri);
+//                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                                startActivity(intent);
                             }
                         });
                 mPendingGeofenceTask = PendingGeofenceTask.NONE;

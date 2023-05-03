@@ -1,4 +1,4 @@
-package co.uk.hive.reactnativegeolocation.sample_app;
+package co.uk.hive.reactnativegeolocation.geofence;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -26,6 +26,8 @@ import com.google.android.gms.location.GeofencingEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import uk.co.centrica.hive.reactnativegeolocation.R;
 
 /**
  * Listener for geofence transition changes.
@@ -97,7 +99,7 @@ public class GeofenceTransitionsWorker extends Worker {
 
         } else {
             // Log the error.
-            Log.e(TAG, context.getString(R.string.geofence_transition_invalid_type, geofenceTransition));
+            Log.e(TAG, "Geofence transition error: invalid transition type!");
         }
     }
 
@@ -175,7 +177,7 @@ public class GeofenceTransitionsWorker extends Worker {
 
         // Android O requires a Notification Channel.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = mContext.getString(R.string.app_name);
+            CharSequence name = "Sample app";
             // Create the channel for the notification
             NotificationChannel mChannel =
                     new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
@@ -184,36 +186,36 @@ public class GeofenceTransitionsWorker extends Worker {
             mNotificationManager.createNotificationChannel(mChannel);
         }
 
-        // Create an explicit content Intent that starts the main Activity.
-        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
-
-        // Construct a task stack.
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(mContext);
-
-        // Add the main Activity to the task stack as the parent.
-        stackBuilder.addParentStack(MainActivity.class);
-
-        // Push the content Intent onto the stack.
-        stackBuilder.addNextIntent(notificationIntent);
-
-        // TODO: Add S support
-        // Get a PendingIntent containing the entire back stack.
-        PendingIntent notificationPendingIntent =
-                stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+//        // Create an explicit content Intent that starts the main Activity.
+//        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
+//
+//        // Construct a task stack.
+//        TaskStackBuilder stackBuilder = TaskStackBuilder.create(mContext);
+//
+//        // Add the main Activity to the task stack as the parent.
+//        stackBuilder.addParentStack(MainActivity.class);
+//
+//        // Push the content Intent onto the stack.
+//        stackBuilder.addNextIntent(notificationIntent);
+//
+//        // TODO: Add S support
+//        // Get a PendingIntent containing the entire back stack.
+//        PendingIntent notificationPendingIntent =
+//                stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
 
         // Get a notification builder that's compatible with platform versions >= 4
         NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
 
         // Define the notification settings.
-        builder.setSmallIcon(R.mipmap.ic_launcher)
+        builder.setSmallIcon(R.drawable.ic_notification)
                 // In a real app, you may want to use a library like Volley
                 // to decode the Bitmap.
                 .setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(),
-                        R.mipmap.ic_launcher))
+                        R.drawable.ic_notification))
                 .setColor(Color.RED)
                 .setContentTitle(notificationDetails)
-                .setContentText(mContext.getString(R.string.geofence_transition_notification_text))
-                .setContentIntent(notificationPendingIntent);
+                .setContentText("Click notification to return to app");
+                //.setContentIntent(notificationPendingIntent);
 
         // Set the Channel ID for Android O.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -237,11 +239,11 @@ public class GeofenceTransitionsWorker extends Worker {
     private static String getTransitionString(Context context, int transitionType) {
         switch (transitionType) {
             case Geofence.GEOFENCE_TRANSITION_ENTER:
-                return context.getString(R.string.geofence_transition_entered);
+                return "Entered";
             case Geofence.GEOFENCE_TRANSITION_EXIT:
-                return context.getString(R.string.geofence_transition_exited);
+                return "Exiting";
             default:
-                return context.getString(R.string.unknown_geofence_transition);
+                return "Unknown";
         }
     }
 

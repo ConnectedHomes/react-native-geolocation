@@ -1,4 +1,4 @@
-package co.uk.hive.reactnativegeolocation.sample_app;
+package co.uk.hive.reactnativegeolocation.geofence;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -9,7 +9,7 @@ import com.google.android.gms.location.GeofenceStatusCodes;
 /**
  * Geofence error codes mapped to error messages.
  */
-class GeofenceErrorMessages {
+public class GeofenceErrorMessages {
     /**
      * Prevents instantiation.
      */
@@ -22,7 +22,7 @@ class GeofenceErrorMessages {
         if (e instanceof ApiException) {
             return getErrorString(context, ((ApiException) e).getStatusCode());
         } else {
-            return context.getResources().getString(R.string.unknown_geofence_error);
+            return "Unknown error: the Geofence service is not available now";
         }
     }
 
@@ -36,13 +36,13 @@ class GeofenceErrorMessages {
                 // TODO: This requires a re-registering?
                 // TODO: Broadcast receiver for when location enabled again?
                 // TODO: Signal to data storage that re-register is required?
-                return mResources.getString(R.string.geofence_not_available);
+                return "Geofence service is not available now";
             case GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES:
-                return mResources.getString(R.string.geofence_too_many_geofences);
+                return "Your app has registered too many geofences";
             case GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS:
-                return mResources.getString(R.string.geofence_too_many_pending_intents);
+                return "You have provided too many PendingIntents to the addGeofences() call";
             default:
-                return mResources.getString(R.string.unknown_geofence_error);
+                return "Unknown error: the Geofence service is not available now";
         }
     }
 }
