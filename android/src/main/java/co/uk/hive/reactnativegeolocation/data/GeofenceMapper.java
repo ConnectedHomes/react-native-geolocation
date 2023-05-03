@@ -1,4 +1,4 @@
-package co.uk.hive.reactnativegeolocation.geofence;
+package co.uk.hive.reactnativegeolocation.data;
 
 import android.location.Location;
 import android.os.PersistableBundle;
@@ -6,8 +6,10 @@ import com.google.android.gms.location.GeofencingEvent;
 
 import static com.google.android.gms.location.Geofence.*;
 
-class GeofenceMapper {
-    PersistableBundle toBundle(GeofencingEvent event, Geofence geofence, long timestamp) {
+import co.uk.hive.reactnativegeolocation.geofence.legacy.Geofence;
+
+public class GeofenceMapper {
+    public PersistableBundle toBundle(GeofencingEvent event, Geofence geofence, long timestamp) {
         PersistableBundle bundle = new PersistableBundle();
         bundle.putString("action", getGeofenceAction(event.getGeofenceTransition()));
         bundle.putString("identifier", geofence.getId());

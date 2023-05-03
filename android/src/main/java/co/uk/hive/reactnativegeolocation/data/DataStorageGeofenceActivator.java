@@ -1,9 +1,8 @@
-package co.uk.hive.reactnativegeolocation.geofence;
+package co.uk.hive.reactnativegeolocation.data;
 
-import co.uk.hive.reactnativegeolocation.DataMarshaller;
-import co.uk.hive.reactnativegeolocation.DataStorage;
+import co.uk.hive.reactnativegeolocation.geofence.legacy.GeofenceActivator;
 
-class DataStorageGeofenceActivator implements GeofenceActivator {
+public class DataStorageGeofenceActivator implements GeofenceActivator {
 
     public static final String KEY_ACTIVATED = "key_activated";
 

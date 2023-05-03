@@ -1,4 +1,4 @@
-package co.uk.hive.reactnativegeolocation.geofence;
+package co.uk.hive.reactnativegeolocation.geofence.legacy;
 
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;

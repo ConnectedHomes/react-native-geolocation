@@ -33,6 +33,9 @@ class GeofenceErrorMessages {
         Resources mResources = context.getResources();
         switch (errorCode) {
             case GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE:
+                // TODO: This requires a re-registering?
+                // TODO: Broadcast receiver for when location enabled again?
+                // TODO: Signal to data storage that re-register is required?
                 return mResources.getString(R.string.geofence_not_available);
             case GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES:
                 return mResources.getString(R.string.geofence_too_many_geofences);

@@ -22,8 +22,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
      */
     @Override
     public void onReceive(Context context, Intent intent) {
-        // Enqueues a JobIntentService passing the context and intent as parameters
-        //GeofenceTransitionsJobIntentService.enqueueWork(context, intent);
+        // TODO: This only exists to send notifs... we may want to do the RN comms here
         GeofenceTransitionsWorker.enqueueWork(context, intent);
     }
 }

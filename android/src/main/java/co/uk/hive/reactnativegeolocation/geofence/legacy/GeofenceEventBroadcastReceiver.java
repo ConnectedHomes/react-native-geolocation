@@ -1,4 +1,4 @@
-package co.uk.hive.reactnativegeolocation.geofence;
+package co.uk.hive.reactnativegeolocation.geofence.legacy;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -6,8 +6,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.util.Log;
-import co.uk.hive.reactnativegeolocation.ForegroundChecker;
-import co.uk.hive.reactnativegeolocation.RNMapper;
+
+import co.uk.hive.reactnativegeolocation.data.GeofenceMapper;
+import co.uk.hive.reactnativegeolocation.util.ForegroundChecker;
+import co.uk.hive.reactnativegeolocation.data.RNMapper;
+import co.uk.hive.reactnativegeolocation.work.GeofenceEventWorker;
+
 import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
 import com.facebook.react.ReactApplication;

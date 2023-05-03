@@ -1,14 +1,16 @@
 package co.uk.hive.reactnativegeolocation.geofence;
 
-import co.uk.hive.reactnativegeolocation.DataMarshaller;
-import co.uk.hive.reactnativegeolocation.DataStorage;
+import co.uk.hive.reactnativegeolocation.data.DataMarshaller;
+import co.uk.hive.reactnativegeolocation.data.DataStorage;
+import co.uk.hive.reactnativegeolocation.data.DataStorageGeofenceActivator;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static co.uk.hive.reactnativegeolocation.geofence.DataStorageGeofenceActivator.KEY_ACTIVATED;
+import static co.uk.hive.reactnativegeolocation.data.DataStorageGeofenceActivator.KEY_ACTIVATED;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;

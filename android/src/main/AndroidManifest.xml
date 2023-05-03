@@ -10,21 +10,21 @@
 
     <application>
         <service
-                android:name="co.uk.hive.reactnativegeolocation.geofence.GeofenceHeadlessJsTaskService"
+                android:name="co.uk.hive.reactnativegeolocation.geofence.legacy.GeofenceHeadlessJsTaskService"
                 android:permission="android.permission.BIND_JOB_SERVICE"
                 android:exported="false"/>
 
         <receiver
-                android:name="co.uk.hive.reactnativegeolocation.geofence.GeofenceEventBroadcastReceiver"
+                android:name="co.uk.hive.reactnativegeolocation.geofence.legacy.GeofenceEventBroadcastReceiver"
                 android:exported="false"/>
 
         <service
-                android:name="co.uk.hive.reactnativegeolocation.geofence.ReRegisterGeofencesOreoJobService"
+                android:name="co.uk.hive.reactnativegeolocation.geofence.legacy.ReRegisterGeofencesOreoJobService"
                 android:permission="android.permission.BIND_JOB_SERVICE"
                 android:exported="false"/>
 
         <receiver
-                android:name="co.uk.hive.reactnativegeolocation.geofence.ReRegisterGeofencesReceiver"
+                android:name="co.uk.hive.reactnativegeolocation.geofence.legacy.ReRegisterGeofencesReceiver"
                 android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>

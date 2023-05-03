@@ -1,4 +1,4 @@
-package co.uk.hive.reactnativegeolocation.geofence;
+package co.uk.hive.reactnativegeolocation.geofence.legacy;
 
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
@@ -17,7 +17,7 @@ import java.util.List;
 
 import static com.google.android.gms.location.Geofence.*;
 
-import co.uk.hive.reactnativegeolocation.PermissionChecker;
+import co.uk.hive.reactnativegeolocation.util.PermissionChecker;
 
 public class GeofenceEngine {
 

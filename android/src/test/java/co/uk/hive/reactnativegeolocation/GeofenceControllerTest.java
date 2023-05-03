@@ -1,6 +1,11 @@
 package co.uk.hive.reactnativegeolocation;
 
-import co.uk.hive.reactnativegeolocation.geofence.*;
+import co.uk.hive.reactnativegeolocation.data.GeofenceRepository;
+import co.uk.hive.reactnativegeolocation.geofence.legacy.Geofence;
+import co.uk.hive.reactnativegeolocation.geofence.legacy.GeofenceActivator;
+import co.uk.hive.reactnativegeolocation.geofence.legacy.GeofenceController;
+import co.uk.hive.reactnativegeolocation.geofence.legacy.GeofenceEngine;
+
 import com.annimon.stream.function.Function;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -291,11 +291,11 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
      */
     private void setButtonsEnabledState() {
         if (getGeofencesAdded()) {
-            mAddGeofencesButton.setEnabled(false);
-            mRemoveGeofencesButton.setEnabled(true);
+            //mAddGeofencesButton.setEnabled(false);
+            //mRemoveGeofencesButton.setEnabled(true);
         } else {
-            mAddGeofencesButton.setEnabled(true);
-            mRemoveGeofencesButton.setEnabled(false);
+            //mAddGeofencesButton.setEnabled(true);
+            //mRemoveGeofencesButton.setEnabled(false);
         }
     }
 
@@ -449,4 +449,6 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
             }
         }
     }
+
+    // TODO: Include the error resolution options to show high accuracy dialog.. handle denied scenario
 }

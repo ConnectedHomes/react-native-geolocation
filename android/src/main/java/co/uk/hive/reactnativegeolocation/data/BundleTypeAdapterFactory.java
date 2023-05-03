@@ -1,4 +1,4 @@
-package co.uk.hive.reactnativegeolocation;/*
+package co.uk.hive.reactnativegeolocation.data;/*
  * Copyright (C) 2015 Gson Type Adapter Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");

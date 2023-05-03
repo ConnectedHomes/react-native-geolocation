@@ -1,4 +1,4 @@
-package co.uk.hive.reactnativegeolocation
+package co.uk.hive.reactnativegeolocation.util
 
 import android.app.Notification
 import android.app.NotificationChannel

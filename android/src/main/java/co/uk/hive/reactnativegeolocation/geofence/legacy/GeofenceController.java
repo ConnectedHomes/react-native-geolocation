@@ -1,4 +1,4 @@
-package co.uk.hive.reactnativegeolocation.geofence;
+package co.uk.hive.reactnativegeolocation.geofence.legacy;
 
 import android.os.Build;
 import android.util.Log;
@@ -7,6 +7,8 @@ import com.annimon.stream.Stream;
 import com.annimon.stream.function.Function;
 
 import java.util.List;
+
+import co.uk.hive.reactnativegeolocation.data.GeofenceRepository;
 
 @SuppressWarnings("WeakerAccess")
 public class GeofenceController {

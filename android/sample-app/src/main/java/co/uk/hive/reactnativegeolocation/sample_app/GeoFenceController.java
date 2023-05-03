@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-import co.uk.hive.reactnativegeolocation.geofence.Geofence;
+import co.uk.hive.reactnativegeolocation.geofence.legacy.Geofence;
 import co.uk.hive.reactnativegeolocation.location.LatLng;
 
 interface IGeoFenceController {
@@ -41,6 +41,26 @@ interface IGeoFenceController {
     Optional<Geofence> getGeofenceById(String id);
 }
 
+/**
+ * TODO:
+ *
+ * Native:
+ * Check foregeound/background location enabled/granted
+ * Check gps is enabled
+ * Check play services is available
+ * Check location accuracy is enabled (error handling)
+ * Check geofences were previously set (shared preferences)
+ * Re-register on device reboot/nlp/data clear etc...
+ *
+ *
+ * App:
+ * Check geofences active
+ * Check location permissions foreground/background
+ * Re-register geofences
+ * Handle foreground/background emitter/headless task
+ * Remove duplicate code (hooks/sagas)
+ *
+ */
 public class GeoFenceController implements IGeoFenceController {
 
     private final Context mContext;
@@ -56,7 +76,7 @@ public class GeoFenceController implements IGeoFenceController {
 
     @Override
     public void addGeofences(List<Geofence> geofences) {
-        // TODO: Make this dynamic!!! Will add to repo
+        // TODO: Make this dynamic!!! Will add to repository and retrieved when start occurs
         for (Map.Entry<String, LatLng> entry : Constants.GEO_FENCE_LANDMARKS.entrySet()) {
 
             int transition = 0;
@@ -86,7 +106,7 @@ public class GeoFenceController implements IGeoFenceController {
                     // Set the expiration duration of the geofence. This geofence gets automatically
                     // removed after this period of time.
                     // TODO: Set to never Geofence.NEVER_EXPIRE
-                    .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                    .setExpirationDuration(com.google.android.gms.location.Geofence.NEVER_EXPIRE)
 
                     // Set the transition types of interest. Alerts are only generated for these
                     // transition. We track entry and exit transitions in this sample.
@@ -109,12 +129,12 @@ public class GeoFenceController implements IGeoFenceController {
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-
+                        Toast.makeText(mContext, "addGeofences!", Toast.LENGTH_SHORT).show();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-
+                        Toast.makeText(mContext, "addGeofences failed!", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -134,12 +154,12 @@ public class GeoFenceController implements IGeoFenceController {
         mGeofencingClient.removeGeofences(getGeofencePendingIntent(mContext)).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-
+                Toast.makeText(mContext, "removeAllGeofences!", Toast.LENGTH_SHORT).show();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-
+                Toast.makeText(mContext, "removeAllGeofences failed!", Toast.LENGTH_SHORT).show();
             }
         });
     }

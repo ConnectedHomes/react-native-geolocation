@@ -1,11 +1,10 @@
-package co.uk.hive.reactnativegeolocation.geofence
+package co.uk.hive.reactnativegeolocation.work
 
 import android.content.Context
 import android.os.PersistableBundle
 import android.util.Log
 import androidx.annotation.NonNull
 import androidx.work.*
-import co.uk.hive.reactnativegeolocation.HeadlessJsTaskWorker
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.jstasks.HeadlessJsTaskConfig
 

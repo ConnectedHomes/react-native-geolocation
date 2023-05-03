@@ -1,4 +1,4 @@
-package co.uk.hive.reactnativegeolocation
+package co.uk.hive.reactnativegeolocation.work
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -9,6 +9,7 @@ import androidx.work.ForegroundInfo
 import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
 import androidx.work.impl.utils.futures.SettableFuture
+import co.uk.hive.reactnativegeolocation.util.ServiceNotificationHelper
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactInstanceManager.ReactInstanceEventListener
 import com.facebook.react.ReactNativeHost

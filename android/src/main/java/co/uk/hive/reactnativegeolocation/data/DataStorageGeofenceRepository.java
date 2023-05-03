@@ -1,7 +1,7 @@
-package co.uk.hive.reactnativegeolocation.geofence;
+package co.uk.hive.reactnativegeolocation.data;
 
-import co.uk.hive.reactnativegeolocation.DataMarshaller;
-import co.uk.hive.reactnativegeolocation.DataStorage;
+import co.uk.hive.reactnativegeolocation.geofence.legacy.Geofence;
+
 import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
 

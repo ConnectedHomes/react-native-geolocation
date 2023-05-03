@@ -2,19 +2,20 @@
 package co.uk.hive.reactnativegeolocation;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import co.uk.hive.reactnativegeolocation.geofence.Geofence;
-import co.uk.hive.reactnativegeolocation.geofence.GeofenceController;
-import co.uk.hive.reactnativegeolocation.geofence.GeofenceServiceLocator;
+import co.uk.hive.reactnativegeolocation.data.RNMapper;
+import co.uk.hive.reactnativegeolocation.geofence.legacy.Geofence;
+import co.uk.hive.reactnativegeolocation.geofence.legacy.GeofenceController;
+import co.uk.hive.reactnativegeolocation.geofence.legacy.GeofenceServiceLocator;
 import co.uk.hive.reactnativegeolocation.location.LatLng;
 import co.uk.hive.reactnativegeolocation.location.LocationController;
+import co.uk.hive.reactnativegeolocation.util.LocationServicesChecker;
+
 import com.annimon.stream.Stream;
 import com.annimon.stream.function.Function;
 import com.facebook.react.ReactApplication;

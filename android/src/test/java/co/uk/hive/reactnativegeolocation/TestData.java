@@ -1,6 +1,6 @@
 package co.uk.hive.reactnativegeolocation;
 
-import co.uk.hive.reactnativegeolocation.geofence.Geofence;
+import co.uk.hive.reactnativegeolocation.geofence.legacy.Geofence;
 
 class TestData {
     static Geofence createGeofence(String id) {
