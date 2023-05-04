@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import androidx.annotation.Nullable;
 import android.util.Log;
-import co.uk.hive.reactnativegeolocation.RNMapper;
+import co.uk.hive.reactnativegeolocation.data.RNMapper;
 import com.facebook.react.JobHeadlessJsTaskService;
 import com.facebook.react.jstasks.HeadlessJsTaskConfig;
 

@@ -1,4 +1,4 @@
-package co.uk.hive.reactnativegeolocation;
+package co.uk.hive.reactnativegeolocation.data;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

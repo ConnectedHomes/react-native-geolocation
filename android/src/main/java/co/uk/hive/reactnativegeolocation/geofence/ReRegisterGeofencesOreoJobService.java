@@ -7,8 +7,8 @@ import androidx.annotation.RequiresApi;
 
 import com.annimon.stream.function.Function;
 
-import co.uk.hive.reactnativegeolocation.LocationChecker;
-import co.uk.hive.reactnativegeolocation.PermissionChecker;
+import co.uk.hive.reactnativegeolocation.util.LocationChecker;
+import co.uk.hive.reactnativegeolocation.util.PermissionChecker;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class ReRegisterGeofencesOreoJobService extends JobService {

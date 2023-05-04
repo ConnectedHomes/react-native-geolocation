@@ -6,8 +6,8 @@ import android.content.Intent;
 import android.location.LocationManager;
 import android.net.Uri;
 
-import co.uk.hive.reactnativegeolocation.LocationChecker;
-import co.uk.hive.reactnativegeolocation.PermissionChecker;
+import co.uk.hive.reactnativegeolocation.util.LocationChecker;
+import co.uk.hive.reactnativegeolocation.util.PermissionChecker;
 
 import com.annimon.stream.Stream;
 import com.annimon.stream.function.Function;

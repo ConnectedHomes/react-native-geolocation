@@ -1,7 +1,7 @@
 package co.uk.hive.reactnativegeolocation.geofence;
 
-import co.uk.hive.reactnativegeolocation.DataMarshaller;
-import co.uk.hive.reactnativegeolocation.DataStorage;
+import co.uk.hive.reactnativegeolocation.data.DataMarshaller;
+import co.uk.hive.reactnativegeolocation.data.DataStorage;
 
 class DataStorageGeofenceActivator implements GeofenceActivator {
 

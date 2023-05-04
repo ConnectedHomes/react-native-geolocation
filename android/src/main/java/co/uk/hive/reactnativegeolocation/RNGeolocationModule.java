@@ -1,17 +1,18 @@
 
 package co.uk.hive.reactnativegeolocation;
 
+import co.uk.hive.reactnativegeolocation.data.RNMapper;
 import co.uk.hive.reactnativegeolocation.geofence.Geofence;
 import co.uk.hive.reactnativegeolocation.geofence.GeofenceController;
 import co.uk.hive.reactnativegeolocation.geofence.GeofenceServiceLocator;
 import co.uk.hive.reactnativegeolocation.location.LatLng;
 import co.uk.hive.reactnativegeolocation.location.LocationController;
+import co.uk.hive.reactnativegeolocation.util.LocationServicesChecker;
+
 import com.annimon.stream.Stream;
 import com.annimon.stream.function.Function;
 import com.facebook.react.bridge.*;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.GeofenceStatusCodes;
 import com.facebook.react.bridge.WritableMap;
 
 import java.util.List;

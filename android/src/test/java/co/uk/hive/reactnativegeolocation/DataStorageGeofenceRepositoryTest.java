@@ -1,5 +1,7 @@
 package co.uk.hive.reactnativegeolocation;
 
+import co.uk.hive.reactnativegeolocation.data.DataMarshaller;
+import co.uk.hive.reactnativegeolocation.data.DataStorage;
 import co.uk.hive.reactnativegeolocation.geofence.DataStorageGeofenceRepository;
 import co.uk.hive.reactnativegeolocation.geofence.Geofence;
 import org.junit.Before;
