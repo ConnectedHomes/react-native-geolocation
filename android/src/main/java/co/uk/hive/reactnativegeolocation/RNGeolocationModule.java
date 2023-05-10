@@ -22,6 +22,7 @@ import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 import java.util.List;
+import java.util.Objects;
 
 import co.uk.hive.reactnativegeolocation.data.RNMapper;
 import co.uk.hive.reactnativegeolocation.geofence.Geofence;
@@ -30,6 +31,7 @@ import co.uk.hive.reactnativegeolocation.geofence.GeofenceLog;
 import co.uk.hive.reactnativegeolocation.geofence.GeofenceServiceLocator;
 import co.uk.hive.reactnativegeolocation.location.LatLng;
 import co.uk.hive.reactnativegeolocation.location.LocationController;
+import co.uk.hive.reactnativegeolocation.location.LocationError;
 import co.uk.hive.reactnativegeolocation.util.LocationServicesChecker;
 
 public class RNGeolocationModule extends ReactContextBaseJavaModule implements ActivityEventListener {
@@ -40,6 +42,7 @@ public class RNGeolocationModule extends ReactContextBaseJavaModule implements A
     private final GeofenceController mGeofenceController;
     private final LocationController mLocationController;
     private final RNMapper mRnMapper;
+    private Callback mResolvableApiErrorCallback = null;
 
     public RNGeolocationModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -103,34 +106,25 @@ public class RNGeolocationModule extends ReactContextBaseJavaModule implements A
         promise.resolve(locationEnabled);
     }
 
-    // TODO: Tidy up convertCallback
     private <T> Function<T, Object> convertCallback(Callback callback) {
         return t -> {
             if (t instanceof ApiException) {
                 final ApiException apiException = (ApiException) t;
-
-                // TODO: Use LOCATION_SETTINGS_FAILED if nothing else matches
                 switch (apiException.getStatusCode()) {
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED: {
-                        // Location settings are not satisfied. But could be fixed by showing the
-                        // user a dialog.
+                        // Location settings are not satisfied. But could be fixed by showing the user a dialog.
                         try {
-                            // Cast to a resolvable exception.
                             final ResolvableApiException resolvable = (ResolvableApiException) apiException;
-                            // Show the dialog by calling startResolutionForResult(), and check the result in onActivityResult().
-                            resolvable.startResolutionForResult(getCurrentActivity(), REQUEST_CHECK_SETTINGS);
-                        } catch (IntentSender.SendIntentException e) {
-                            // Ignore the error.
-                            // TODO: Pass result back to app with error code
-                        } catch (ClassCastException e) {
-                            // Ignore, should be an impossible error.
-                            // TODO: Pass result back to app with error code
+                            resolvable.startResolutionForResult(Objects.requireNonNull(reactContext.getCurrentActivity()), REQUEST_CHECK_SETTINGS);
+                            mResolvableApiErrorCallback = callback;
+                        } catch (IntentSender.SendIntentException | ClassCastException e) {
+                            callback.invoke(LocationError.LOCATION_SETTINGS_FAILED);
                         }
                         break;
                     }
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE: {
-                        // TODO: Pass result back to app with error code
                         GeofenceLog.e("Location resolvable settings change unavailable!");
+                        callback.invoke(LocationError.LOCATION_SETTINGS_FAILED);
                         break;
                     }
                     default: {
@@ -145,11 +139,9 @@ public class RNGeolocationModule extends ReactContextBaseJavaModule implements A
             } else if (t instanceof Exception) {
                 final Exception exception = (Exception) t;
                 final WritableMap errorMap = Arguments.createMap();
-
                 errorMap.putString("exceptionType", t.getClass().toString());
                 errorMap.putString("message", exception.getMessage());
                 errorMap.putString("JIRA", "MA1-1200");
-
                 callback.invoke(errorMap);
             } else {
                 callback.invoke(t);
@@ -167,8 +159,10 @@ public class RNGeolocationModule extends ReactContextBaseJavaModule implements A
                     GeofenceLog.d("Location accuracy setting enabled!");
                     break;
                 case Activity.RESULT_CANCELED:
-                    // TODO: Pass result back to app with error code
                     GeofenceLog.d("User cancelled location accuracy improvement request!");
+                    if (mResolvableApiErrorCallback != null) {
+                        mResolvableApiErrorCallback.invoke(LocationError.LOCATION_ACCURACY_DISABLED);
+                    }
                     break;
                 default:
                     break;
