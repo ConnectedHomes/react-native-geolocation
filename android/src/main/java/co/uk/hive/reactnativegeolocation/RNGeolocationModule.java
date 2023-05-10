@@ -109,6 +109,7 @@ public class RNGeolocationModule extends ReactContextBaseJavaModule implements A
             if (t instanceof ApiException) {
                 final ApiException apiException = (ApiException) t;
 
+                // TODO: Use LOCATION_SETTINGS_FAILED if nothing else matches
                 switch (apiException.getStatusCode()) {
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED: {
                         // Location settings are not satisfied. But could be fixed by showing the

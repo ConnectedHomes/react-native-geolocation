@@ -103,8 +103,9 @@ public class LocationController {
                 .addLocationRequest(locationRequest);
         SettingsClient client = LocationServices.getSettingsClient(mContext);
 
+        // TODO: Do we need to check location accuracy and avoid using fused if disabled?
         client.checkLocationSettings(builder.build())
-                .addOnFailureListener(TaskExecutors.MAIN_THREAD, ignored -> failureCallback.apply(LocationError.LOCATION_SETTINGS_FAILED))
+                .addOnFailureListener(TaskExecutors.MAIN_THREAD, exception -> failureCallback.apply(exception)) // Was LocationError.LOCATION_SETTINGS_FAILED!
                 .addOnSuccessListener(TaskExecutors.MAIN_THREAD, ignored -> requestLocation(currentPositionRequest, successCallback, failureCallback));
     }
 
