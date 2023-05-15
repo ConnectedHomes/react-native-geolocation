@@ -10,8 +10,6 @@ import com.annimon.stream.Stream;
 import com.annimon.stream.function.Function;
 import com.facebook.react.bridge.*;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.GeofenceStatusCodes;
 import com.facebook.react.bridge.WritableMap;
 
 import java.util.List;
