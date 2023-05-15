@@ -116,8 +116,9 @@ public class RNGeolocationModule extends ReactContextBaseJavaModule implements A
                         try {
                             final ResolvableApiException resolvable = (ResolvableApiException) apiException;
                             resolvable.startResolutionForResult(Objects.requireNonNull(reactContext.getCurrentActivity()), REQUEST_CHECK_SETTINGS);
-                            mResolvableApiErrorCallback = callback;
+                            //mResolvableApiErrorCallback = callback;
                         } catch (IntentSender.SendIntentException | ClassCastException e) {
+                            GeofenceLog.d("RESOLUTION_REQUIRED Error: " + e.getMessage());
                             callback.invoke(LocationError.LOCATION_SETTINGS_FAILED);
                         }
                         break;

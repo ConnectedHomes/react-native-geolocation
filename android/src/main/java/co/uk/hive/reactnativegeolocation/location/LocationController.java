@@ -29,6 +29,8 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskExecutors;
 
+import co.uk.hive.reactnativegeolocation.geofence.GeofenceLog;
+
 public class LocationController {
     private final Context mContext;
     private final FusedLocationProviderClient mLocationClient;
@@ -42,7 +44,7 @@ public class LocationController {
         mHandler = new Handler(Looper.getMainLooper());
     }
 
-    private boolean isLocationEnabled() {
+    public boolean isLocationEnabled() {
         final LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         if (locationManager != null) {
             if (!IS_ANDROID_8_OR_BELOW) {
@@ -105,11 +107,15 @@ public class LocationController {
 
         // TODO: Do we need to check location accuracy and avoid using fused if disabled?
         client.checkLocationSettings(builder.build())
-                .addOnFailureListener(TaskExecutors.MAIN_THREAD, exception -> failureCallback.apply(exception)) // Was LocationError.LOCATION_SETTINGS_FAILED!
+                .addOnFailureListener(TaskExecutors.MAIN_THREAD, exception -> {
+                    // Was LocationError.LOCATION_SETTINGS_FAILED!
+                    GeofenceLog.d("checkLocationSettings: " + exception.getMessage());
+                    failureCallback.apply(exception);
+                })
                 .addOnSuccessListener(TaskExecutors.MAIN_THREAD, ignored -> requestLocation(currentPositionRequest, successCallback, failureCallback));
     }
 
-    private boolean hasPermissions() {
+    public boolean hasPermissions() {
         return Stream.of(
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -124,9 +130,9 @@ public class LocationController {
     }
 
     @MainThread
-    private void requestLocation(CurrentPositionRequest currentPositionRequest,
-                                 Function<LatLng, Object> successCallback,
-                                 Function<Object, Object> failureCallback) {
+    public void requestLocation(CurrentPositionRequest currentPositionRequest,
+                                Function<LatLng, Object> successCallback,
+                                Function<Object, Object> failureCallback) {
         final SingleLocationCallback singleLocationCallback = new SingleLocationCallback(successCallback, failureCallback);
 
         final LocationCallback locationCallback = new LocationCallback() {
