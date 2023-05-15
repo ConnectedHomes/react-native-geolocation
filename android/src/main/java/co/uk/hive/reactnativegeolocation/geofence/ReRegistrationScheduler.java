@@ -41,6 +41,7 @@ public class ReRegistrationScheduler {
         return new JobInfo.TriggerContentUri(uri, JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private ComponentName getComponentName() {
         return new ComponentName(mContext, ReRegisterGeofencesOreoJobService.class);
     }

@@ -4,6 +4,8 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
 public class PermissionChecker {
@@ -22,6 +24,7 @@ public class PermissionChecker {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     private boolean isBackgroundLocationPermissionGranted() {
         return ContextCompat.checkSelfPermission(mContext,
                 Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED;
@@ -31,5 +34,4 @@ public class PermissionChecker {
         return ContextCompat.checkSelfPermission(mContext,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
-
 }

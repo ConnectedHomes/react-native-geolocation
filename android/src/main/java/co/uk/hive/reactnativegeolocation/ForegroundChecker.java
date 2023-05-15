@@ -29,5 +29,4 @@ public class ForegroundChecker {
         }
         return false;
     }
-
 }
