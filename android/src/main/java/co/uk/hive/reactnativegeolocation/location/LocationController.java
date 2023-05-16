@@ -104,7 +104,7 @@ public class LocationController {
         SettingsClient client = LocationServices.getSettingsClient(mContext);
 
         client.checkLocationSettings(builder.build())
-                .addOnFailureListener(TaskExecutors.MAIN_THREAD, ignored -> failureCallback.apply(LocationError.LOCATION_SETTINGS_FAILED))
+                .addOnFailureListener(TaskExecutors.MAIN_THREAD, failureCallback::apply) // Apply callback function with the error received
                 .addOnSuccessListener(TaskExecutors.MAIN_THREAD, ignored -> requestLocation(currentPositionRequest, successCallback, failureCallback));
     }
 
