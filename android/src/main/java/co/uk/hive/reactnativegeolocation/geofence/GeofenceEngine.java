@@ -56,6 +56,7 @@ public class GeofenceEngine {
                         .setLoiteringDelay(geofence.getLoiteringDelay())
                         .setTransitionTypes(defineTransitionTypes(geofence))
                         .setExpirationDuration(NEVER_EXPIRE)
+                        .setNotificationResponsiveness(5000)
                         .build())
                 .toList();
 
