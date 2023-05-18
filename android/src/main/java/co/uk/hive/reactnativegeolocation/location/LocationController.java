@@ -118,7 +118,7 @@ public class LocationController {
     private LocationRequest getLocationRequest(CurrentPositionRequest currentPositionRequest) {
         return LocationRequest.create()
                 .setNumUpdates(1)
-                .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
+                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
                 .setExpirationDuration(currentPositionRequest.getTimeout());
     }
 

@@ -22,6 +22,7 @@ const LocationError = {
 export default class Geolocation extends PlatformGeolocation {
   static isLocationUnknown(error) {
       return [
+        LocationError.LOCATION_UNKNOWN,
         LocationError.PERMISSION_DENIED,
         LocationError.LOCATION_CLIENT_IS_NULL ,
         LocationError.LOCATION_DISABLED ,
