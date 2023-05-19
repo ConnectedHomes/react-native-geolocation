@@ -7,8 +7,6 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.MainThread;
@@ -19,9 +17,7 @@ import com.annimon.stream.function.Function;
 import com.google.android.gms.location.CurrentLocationRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.Granularity;
-import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.Priority;
@@ -32,14 +28,11 @@ import com.google.android.gms.tasks.TaskExecutors;
 public class LocationController {
     private final Context mContext;
     private final FusedLocationProviderClient mLocationClient;
-    private final Handler mHandler;
-    private static final long CURRENT_LOCATION_REQUEST_DURATION_MILLIS = 3000;
     private static final boolean IS_ANDROID_8_OR_BELOW = !(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P);
 
     public LocationController(Context context) {
         mContext = context;
         mLocationClient = LocationServices.getFusedLocationProviderClient(context);
-        mHandler = new Handler(Looper.getMainLooper());
     }
 
     private boolean isLocationEnabled() {
@@ -74,33 +67,16 @@ public class LocationController {
             failureCallback.apply(LocationError.PERMISSION_DENIED);
             return;
         }
-        // TODO: THIS IS THE BLOODY SAME!!! LETS USE THE SAME THING FOR ALL OS VERSIONS!!
+
         // Android 8 and below (Fused location provider not working when device only location mode set in OS)
         if (IS_ANDROID_8_OR_BELOW) {
-            final CurrentLocationRequest currentLocationRequest = new CurrentLocationRequest.Builder()
-                    .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-                    .setGranularity(Granularity.GRANULARITY_FINE)
-                    .setDurationMillis(CURRENT_LOCATION_REQUEST_DURATION_MILLIS).build();
-
-            final Task<Location> currentLocationTask = mLocationClient.getCurrentLocation(currentLocationRequest, null);
-            currentLocationTask.addOnSuccessListener(location -> {
-                if (location == null || Double.isNaN(location.getLatitude()) || Double.isNaN(location.getLongitude())) {
-                    failureCallback.apply(LocationError.LOCATION_IS_NULL);
-                } else {
-                    successCallback.apply(new LatLng(location.getLatitude(), location.getLongitude()));
-                }
-            });
-            currentLocationTask.addOnFailureListener(e -> {
-                Log.e(LocationController.class.getName(), e.getMessage() != null ? e.getMessage() : "Unable to access current position!");
-                failureCallback.apply(LocationError.CURRENT_LOCATION_FAILED);
-            });
+            requestLocation(currentPositionRequest, successCallback, failureCallback);
             return;
         }
 
         // Android 9+ (Fused location provider will use a number of sources to calculate accuracy - cell, wifi, bluetooth, gps etc..)
         final LocationRequest locationRequest = getLocationRequest(currentPositionRequest);
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(locationRequest);
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
         SettingsClient client = LocationServices.getSettingsClient(mContext);
 
         client.checkLocationSettings(builder.build())
@@ -116,31 +92,18 @@ public class LocationController {
     }
 
     private LocationRequest getLocationRequest(CurrentPositionRequest currentPositionRequest) {
-        return LocationRequest.create()
-                .setNumUpdates(1)
+        return new LocationRequest.Builder(3000)
                 .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-                .setExpirationDuration(currentPositionRequest.getTimeout());
+                .setGranularity(Granularity.GRANULARITY_FINE)
+                .setMaxUpdates(1)
+                .setDurationMillis(currentPositionRequest.getTimeout())
+                .build();
     }
 
     @MainThread
     private void requestLocation(CurrentPositionRequest currentPositionRequest,
                                  Function<LatLng, Object> successCallback,
                                  Function<Object, Object> failureCallback) {
-        final SingleLocationCallback singleLocationCallback = new SingleLocationCallback(successCallback, failureCallback);
-
-        final LocationCallback locationCallback = new LocationCallback() {
-            public void onLocationResult(LocationResult locationResult) {
-                mHandler.removeCallbacksAndMessages(null);
-                if (locationResult.getLastLocation() != null) {
-                    singleLocationCallback.locationReceived(new LatLng(
-                            locationResult.getLastLocation().getLatitude(),
-                            locationResult.getLastLocation().getLongitude()));
-                } else {
-                    singleLocationCallback.locationUnknown();
-                }
-            }
-        };
-
         if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             final String errorMessage = "Missing the required location permissions!";
@@ -148,52 +111,24 @@ public class LocationController {
             failureCallback.apply(errorMessage);
             return;
         }
-        //mLocationClient.requestLocationUpdates(getLocationRequest(currentPositionRequest), locationCallback, Looper.getMainLooper());
 
-        // TODO: THIS IS THE BLOODY SAME!!! LETS USE THE SAME THING FOR ALL OS VERSIONS!!
-        final CurrentLocationRequest currentLocationRequest1 = new CurrentLocationRequest.Builder()
+        final CurrentLocationRequest currentLocationRequest = new CurrentLocationRequest.Builder()
                 .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-                .setDurationMillis(currentPositionRequest.getTimeout())
                 .setGranularity(Granularity.GRANULARITY_FINE)
+                .setDurationMillis(currentPositionRequest.getTimeout())
                 .build();
 
-        mLocationClient.getCurrentLocation(currentLocationRequest1, null)
-                .addOnSuccessListener(location -> singleLocationCallback.locationReceived(new LatLng(location.getLatitude(), location.getLongitude())))
-                .addOnFailureListener(e -> singleLocationCallback.locationUnknown());
-
-//        final long timeout = currentPositionRequest.getTimeout();
-//        mHandler.postDelayed(() -> {
-//            mLocationClient.removeLocationUpdates(locationCallback);
-//            singleLocationCallback.locationUnknown();
-//        }, timeout);
-    }
-
-    private static class SingleLocationCallback {
-        private final Function<LatLng, Object> mSuccessCallback;
-        private final Function<Object, Object> mFailureCallback;
-        private boolean mCalledBack;
-
-        private SingleLocationCallback(Function<LatLng, Object> successCallback, Function<Object, Object> failureCallback) {
-            mSuccessCallback = successCallback;
-            mFailureCallback = failureCallback;
-        }
-
-        private void locationReceived(LatLng latLng) {
-            if (mCalledBack) {
-                return;
+        final Task<Location> currentLocationTask = mLocationClient.getCurrentLocation(currentLocationRequest, null);
+        currentLocationTask.addOnSuccessListener(location -> {
+            if (location == null || Double.isNaN(location.getLatitude()) || Double.isNaN(location.getLongitude())) {
+                failureCallback.apply(LocationError.LOCATION_IS_NULL);
+            } else {
+                successCallback.apply(new LatLng(location.getLatitude(), location.getLongitude()));
             }
-
-            mCalledBack = true;
-            mSuccessCallback.apply(latLng);
-        }
-
-        private void locationUnknown() {
-            if (mCalledBack) {
-                return;
-            }
-
-            mCalledBack = true;
-            mFailureCallback.apply(LocationError.LOCATION_UNKNOWN);
-        }
+        });
+        currentLocationTask.addOnFailureListener(e -> {
+            Log.e(LocationController.class.getName(), e.getMessage() != null ? e.getMessage() : "Unable to access current position!");
+            failureCallback.apply(LocationError.CURRENT_LOCATION_FAILED);
+        });
     }
 }
