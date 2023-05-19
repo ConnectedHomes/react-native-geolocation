@@ -148,13 +148,23 @@ public class LocationController {
             failureCallback.apply(errorMessage);
             return;
         }
-        mLocationClient.requestLocationUpdates(getLocationRequest(currentPositionRequest), locationCallback, Looper.getMainLooper());
+        //mLocationClient.requestLocationUpdates(getLocationRequest(currentPositionRequest), locationCallback, Looper.getMainLooper());
 
-        final long timeout = currentPositionRequest.getTimeout();
-        mHandler.postDelayed(() -> {
-            mLocationClient.removeLocationUpdates(locationCallback);
-            singleLocationCallback.locationUnknown();
-        }, timeout);
+        final CurrentLocationRequest currentLocationRequest1 = new CurrentLocationRequest.Builder()
+                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                .setDurationMillis(currentPositionRequest.getTimeout())
+                .setGranularity(Granularity.GRANULARITY_FINE)
+                .build();
+
+        mLocationClient.getCurrentLocation(currentLocationRequest1, null)
+                .addOnSuccessListener(location -> singleLocationCallback.locationReceived(new LatLng(location.getLatitude(), location.getLongitude())))
+                .addOnFailureListener(e -> singleLocationCallback.locationUnknown());
+
+//        final long timeout = currentPositionRequest.getTimeout();
+//        mHandler.postDelayed(() -> {
+//            mLocationClient.removeLocationUpdates(locationCallback);
+//            singleLocationCallback.locationUnknown();
+//        }, timeout);
     }
 
     private static class SingleLocationCallback {
