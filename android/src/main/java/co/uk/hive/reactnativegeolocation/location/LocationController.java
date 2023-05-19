@@ -74,7 +74,7 @@ public class LocationController {
             failureCallback.apply(LocationError.PERMISSION_DENIED);
             return;
         }
-
+        // TODO: THIS IS THE BLOODY SAME!!! LETS USE THE SAME THING FOR ALL OS VERSIONS!!
         // Android 8 and below (Fused location provider not working when device only location mode set in OS)
         if (IS_ANDROID_8_OR_BELOW) {
             final CurrentLocationRequest currentLocationRequest = new CurrentLocationRequest.Builder()
@@ -150,6 +150,7 @@ public class LocationController {
         }
         //mLocationClient.requestLocationUpdates(getLocationRequest(currentPositionRequest), locationCallback, Looper.getMainLooper());
 
+        // TODO: THIS IS THE BLOODY SAME!!! LETS USE THE SAME THING FOR ALL OS VERSIONS!!
         final CurrentLocationRequest currentLocationRequest1 = new CurrentLocationRequest.Builder()
                 .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
                 .setDurationMillis(currentPositionRequest.getTimeout())
