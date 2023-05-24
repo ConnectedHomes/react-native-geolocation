@@ -87,16 +87,6 @@ def kotlin_version = getExtOrDefault('kotlinVersion', DEFAULT_KOTLIN_VERSION)
 dependencies {
     def googlePlayServicesLocationVersion = project.hasProperty('googlePlayServicesLocationVersion') ? project.googlePlayServicesLocationVersion : DEFAULT_GOOGLE_PLAY_SERVICES_LOCATION_VERSION
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    //implementation 'com.facebook.react:react-native:0.67.5!!'
-    //implementation("com.facebook.react:react-native:+")
-//    constraints {
-//        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
-//            because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")
-//        }
-//        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0") {
-//            because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
-//        }
-//    }
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "com.google.android.gms:play-services-location:$googlePlayServicesLocationVersion"
     implementation 'com.annimon:stream:1.1.8'
