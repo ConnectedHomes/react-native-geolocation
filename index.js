@@ -46,4 +46,8 @@ export default class Geolocation extends PlatformGeolocation {
   static isLocationTimeout(error) {
     return error === LocationError.LOCATION_TIMEOUT;
   }
+
+  static isLocationSettingsFailed(error) {
+    return error === LocationError.LOCATION_SETTINGS_FAILED;
+  }
 }
