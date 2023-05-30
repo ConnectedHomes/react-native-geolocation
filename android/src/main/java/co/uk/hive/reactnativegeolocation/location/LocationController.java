@@ -9,6 +9,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.MainThread;
@@ -75,37 +76,33 @@ public class LocationController {
             return;
         }
 
-        // Android 8 and below (Fused location provider not working when device only location mode set in OS)
+        // Android 8 and below
         if (IS_ANDROID_8_OR_BELOW) {
-            final CurrentLocationRequest currentLocationRequest = new CurrentLocationRequest.Builder()
-                    .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-                    .setGranularity(Granularity.GRANULARITY_FINE)
-                    .setDurationMillis(CURRENT_LOCATION_REQUEST_DURATION_MILLIS).build();
-
-            final Task<Location> currentLocationTask = mLocationClient.getCurrentLocation(currentLocationRequest, null);
-            currentLocationTask.addOnSuccessListener(location -> {
-                if (location == null || Double.isNaN(location.getLatitude()) || Double.isNaN(location.getLongitude())) {
-                    failureCallback.apply(LocationError.LOCATION_IS_NULL);
+            try {
+                if (getLocationMode(mContext) == Settings.Secure.LOCATION_MODE_HIGH_ACCURACY) {
+                    requestLocation(currentPositionRequest, successCallback, failureCallback);
                 } else {
-                    successCallback.apply(new LatLng(location.getLatitude(), location.getLongitude()));
+                    failureCallback.apply(LocationError.LOCATION_SETTINGS_FAILED);
                 }
-            });
-            currentLocationTask.addOnFailureListener(e -> {
-                Log.e(LocationController.class.getName(), e.getMessage() != null ? e.getMessage() : "Unable to access current position!");
-                failureCallback.apply(LocationError.CURRENT_LOCATION_FAILED);
-            });
+            } catch (Settings.SettingNotFoundException settingNotFoundException) {
+                // Settings not found, attempt to get location anyways
+                requestLocation(currentPositionRequest, successCallback, failureCallback);
+            }
             return;
         }
 
-        // Android 9+ (Fused location provider will use a number of sources to calculate accuracy - cell, wifi, bluetooth, gps etc..)
+        // Android 9+
         final LocationRequest locationRequest = getLocationRequest(currentPositionRequest);
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(locationRequest);
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
         SettingsClient client = LocationServices.getSettingsClient(mContext);
 
         client.checkLocationSettings(builder.build())
-                .addOnFailureListener(TaskExecutors.MAIN_THREAD, ignored -> failureCallback.apply(LocationError.LOCATION_SETTINGS_FAILED))
+                .addOnFailureListener(TaskExecutors.MAIN_THREAD, failureCallback::apply)
                 .addOnSuccessListener(TaskExecutors.MAIN_THREAD, ignored -> requestLocation(currentPositionRequest, successCallback, failureCallback));
+    }
+
+    private int getLocationMode(Context context) throws Settings.SettingNotFoundException {
+        return Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
     }
 
     private boolean hasPermissions() {
@@ -116,73 +113,43 @@ public class LocationController {
     }
 
     private LocationRequest getLocationRequest(CurrentPositionRequest currentPositionRequest) {
-        return LocationRequest.create()
-                .setNumUpdates(1)
-                .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
-                .setExpirationDuration(currentPositionRequest.getTimeout());
+        return new LocationRequest.Builder(5000)
+                .setMaxUpdates(1)
+                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                .setGranularity(Granularity.GRANULARITY_FINE)
+                .setDurationMillis(currentPositionRequest.getTimeout())
+                .build();
     }
 
     @MainThread
     private void requestLocation(CurrentPositionRequest currentPositionRequest,
                                  Function<LatLng, Object> successCallback,
                                  Function<Object, Object> failureCallback) {
-        final SingleLocationCallback singleLocationCallback = new SingleLocationCallback(successCallback, failureCallback);
-
-        final LocationCallback locationCallback = new LocationCallback() {
-            public void onLocationResult(LocationResult locationResult) {
-                mHandler.removeCallbacksAndMessages(null);
-                if (locationResult.getLastLocation() != null) {
-                    singleLocationCallback.locationReceived(new LatLng(
-                            locationResult.getLastLocation().getLatitude(),
-                            locationResult.getLastLocation().getLongitude()));
-                } else {
-                    singleLocationCallback.locationUnknown();
-                }
-            }
-        };
 
         if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             final String errorMessage = "Missing the required location permissions!";
             Log.e(LocationController.class.getName(), errorMessage);
-            failureCallback.apply(errorMessage);
+            failureCallback.apply(LocationError.PERMISSION_DENIED);
             return;
         }
-        mLocationClient.requestLocationUpdates(getLocationRequest(currentPositionRequest), locationCallback, Looper.getMainLooper());
 
-        final long timeout = currentPositionRequest.getTimeout();
-        mHandler.postDelayed(() -> {
-            mLocationClient.removeLocationUpdates(locationCallback);
-            singleLocationCallback.locationUnknown();
-        }, timeout);
-    }
+        final CurrentLocationRequest currentLocationRequest = new CurrentLocationRequest.Builder()
+                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                .setGranularity(Granularity.GRANULARITY_FINE)
+                .setDurationMillis(currentPositionRequest.getTimeout()).build();
 
-    private static class SingleLocationCallback {
-        private final Function<LatLng, Object> mSuccessCallback;
-        private final Function<Object, Object> mFailureCallback;
-        private boolean mCalledBack;
-
-        private SingleLocationCallback(Function<LatLng, Object> successCallback, Function<Object, Object> failureCallback) {
-            mSuccessCallback = successCallback;
-            mFailureCallback = failureCallback;
-        }
-
-        private void locationReceived(LatLng latLng) {
-            if (mCalledBack) {
-                return;
+        final Task<Location> currentLocationTask = mLocationClient.getCurrentLocation(currentLocationRequest, null);
+        currentLocationTask.addOnSuccessListener(location -> {
+            if (location == null || Double.isNaN(location.getLatitude()) || Double.isNaN(location.getLongitude())) {
+                failureCallback.apply(LocationError.LOCATION_IS_NULL);
+            } else {
+                successCallback.apply(new LatLng(location.getLatitude(), location.getLongitude()));
             }
-
-            mCalledBack = true;
-            mSuccessCallback.apply(latLng);
-        }
-
-        private void locationUnknown() {
-            if (mCalledBack) {
-                return;
-            }
-
-            mCalledBack = true;
-            mFailureCallback.apply(LocationError.LOCATION_UNKNOWN);
-        }
+        });
+        currentLocationTask.addOnFailureListener(e -> {
+            Log.e(LocationController.class.getName(), e.getMessage() != null ? e.getMessage() : "Unable to access current position!");
+            failureCallback.apply(LocationError.CURRENT_LOCATION_FAILED);
+        });
     }
 }
