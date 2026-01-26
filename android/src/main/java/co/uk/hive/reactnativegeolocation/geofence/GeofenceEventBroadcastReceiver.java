@@ -13,6 +13,8 @@ import com.annimon.stream.Stream;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactNativeHost;
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.HeadlessJsTaskService;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingEvent;
@@ -54,22 +56,60 @@ public class GeofenceEventBroadcastReceiver extends BroadcastReceiver {
     private void sendEvent(Context context, Geofence geofence, GeofencingEvent event) {
         long timestamp = System.currentTimeMillis() / 1000;
         PersistableBundle bundle = mGeofenceMapper.toBundle(event, geofence, timestamp);
-        if (mForegroundChecker.isAppInForeground()) {
-            emitRNEvent(context, bundle);
-        } else {
-            runHeadlessJsTask(context, bundle);
+
+
+ReactContext reactContext = getReactContext(context);
+    if (mForegroundChecker.isAppInForeground()
+            && reactContext != null
+            && hasActiveInstance(reactContext)) {
+        emitRNEvent(reactContext, bundle);
+    } else {
+        // background or RN not initialized, then Headless JS
+        runHeadlessJsTask(context, bundle);
+    }
+}
+
+
+    private boolean hasActiveInstance(ReactContext reactContext) {
+        try {
+            // bridge guard, prefer Catalyst check if available.
+            return reactContext.hasActiveCatalystInstance();
+        } catch (Throwable ignored) {
+            // fallback for older forks that used hasActiveReactInstance()
+            try {
+                return (boolean) ReactContext.class
+                        .getMethod("hasActiveReactInstance")
+                        .invoke(reactContext);
+            } catch (Throwable __ignored) {
+                return reactContext != null;
+            }
         }
     }
 
-    private void emitRNEvent(Context context, PersistableBundle bundle) {
-        ReactNativeHost reactNativeHost = ((ReactApplication) context.getApplicationContext()).getReactNativeHost();
-        ReactInstanceManager reactInstanceManager = reactNativeHost.getReactInstanceManager();
-        //noinspection ConstantConditions
-        reactInstanceManager.getCurrentReactContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                .emit(GEOFENCE_EVENT_NAME, mRnMapper.fromBundle(new Bundle(bundle)));
-    }
+      private void emitRNEvent(ReactContext reactContext, PersistableBundle bundle) {
+            reactContext
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                    .emit(GEOFENCE_EVENT_NAME, mRnMapper.fromBundle(new Bundle(bundle)));
+        }
+
+
 
     private void runHeadlessJsTask(Context context, PersistableBundle bundle) {
         GeofenceHeadlessJsTaskService.start(context, bundle);
+        // ensure CPU stays awake while JS task spins up
+        HeadlessJsTaskService.acquireWakeLockNow(context);
     }
+
+        // helper for obtaining the current ReactContext (may be null)
+        private ReactContext getReactContext(Context context) {
+            try {
+                ReactNativeHost host =
+                        ((ReactApplication) context.getApplicationContext()).getReactNativeHost();
+                ReactInstanceManager rim = host.getReactInstanceManager();
+                return rim.getCurrentReactContext();
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to get ReactContext", e);
+                return null;
+            }
+        }
 }
