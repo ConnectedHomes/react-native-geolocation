@@ -23,7 +23,7 @@ import static com.google.android.gms.location.Geofence.*;
 import co.uk.hive.reactnativegeolocation.PermissionChecker;
 
 public class GeofenceEngine {
-private static final String TAG = "GeofenceEngine";
+    private static final String TAG = "GeofenceEngine";
     private final GeofencingClient mGeofencingClient;
     private final PermissionChecker mPermissionChecker;
     private final PendingIntent mPendingIntent;

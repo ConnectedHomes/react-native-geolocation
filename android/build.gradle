@@ -1,5 +1,5 @@
 buildscript {
-    def DEFAULT_KOTLIN_VERSION = '1.6.20'
+    def DEFAULT_KOTLIN_VERSION = '1.6.0'
     ext.kotlin_version = project.ext.has("kotlin_version") ? project.ext.get("kotlin_version") : DEFAULT_KOTLIN_VERSION
     repositories {
         mavenCentral()
