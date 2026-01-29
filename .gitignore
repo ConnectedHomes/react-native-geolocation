@@ -52,4 +52,11 @@ local.properties
 buck-out/
 \.buckd/
 *.keystore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
       
