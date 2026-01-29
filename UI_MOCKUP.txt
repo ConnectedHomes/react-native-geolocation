@@ -1,0 +1,95 @@
+Teacher Login GUI - Visual Layout
+=====================================
+
+┌──────────────────────────────────────────────┐
+│                                              │
+│           Teacher Login                      │
+│           (24pt Arial Bold)                  │
+│                                              │
+├──────────────────────────────────────────────┤
+│                                              │
+│  Teacher ID:  [___________________]  ⚫      │
+│               (Entry field)        (Tick)    │
+│                                              │
+│  Password:    [___________________]          │
+│               (Masked with *)                │
+│                                              │
+│         ┌─────────────────┐                 │
+│         │     Log In      │                 │
+│         │  (Green Button) │                 │
+│         └─────────────────┘                 │
+│                                              │
+│        [Message Display Area]               │
+│        (Shows success/error messages)       │
+│                                              │
+├──────────────────────────────────────────────┤
+│                                              │
+│  For assistance, contact:                   │
+│  support@school.edu | Phone: (555) 123-4567 │
+│                                              │
+└──────────────────────────────────────────────┘
+
+UI Features:
+============
+
+1. TITLE SECTION
+   - "Teacher Login" text at top
+   - 24pt Arial Bold, dark gray color
+   - 20px top padding
+
+2. INPUT SECTION
+   - Teacher ID field with label
+   - Password field (masked) with label
+   - Both fields: 14pt Arial, solid border
+   - Width: 20 characters
+
+3. VISUAL INDICATOR (Tick Mark Canvas)
+   - 50x50 pixel canvas
+   - Shows colored circles:
+     * RED CIRCLE: ID field is empty
+     * GREEN CIRCLE: ID field has content
+   - Updates in real-time as user types
+
+4. LOGIN BUTTON
+   - Text: "Log In"
+   - Color: Green background, white text
+   - Font: 14pt Arial Bold
+   - Size: Width 15, Height 2
+   - Raised border for 3D effect
+   - Hand cursor on hover
+
+5. MESSAGE AREA
+   - Shows feedback messages:
+     * "Login successful" (GREEN) - valid credentials
+     * "Invalid ID or Password" (RED) - wrong credentials
+     * "Please enter ID and Password" (RED) - empty fields
+
+6. CONTACT INFORMATION
+   - Bottom of window
+   - 10pt Arial, gray color
+   - Contact email and phone
+
+Interaction Flow:
+=================
+
+1. User enters Teacher ID
+   → Tick mark changes from RED to GREEN
+
+2. User enters Password
+   → No visual change (for security)
+
+3. User clicks "Log In" button
+   → System validates credentials
+   → Shows success (green) or error (red) message
+
+Valid Credentials:
+==================
+ID: teacher123
+Password: password123
+
+Window Properties:
+==================
+- Size: 450x400 pixels
+- Non-resizable
+- Background: Light gray (#f0f0f0)
+- Title: "Teacher Login"
