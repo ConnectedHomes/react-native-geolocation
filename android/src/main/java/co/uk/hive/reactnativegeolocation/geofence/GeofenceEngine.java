@@ -12,6 +12,10 @@ import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
+import android.util.Log;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.location.GeofenceStatusCodes;
+
 import java.util.List;
 
 import static com.google.android.gms.location.Geofence.*;
@@ -19,7 +23,7 @@ import static com.google.android.gms.location.Geofence.*;
 import co.uk.hive.reactnativegeolocation.PermissionChecker;
 
 public class GeofenceEngine {
-
+    private static final String TAG = "GeofenceEngine";
     private final GeofencingClient mGeofencingClient;
     private final PermissionChecker mPermissionChecker;
     private final PendingIntent mPendingIntent;
@@ -64,17 +68,39 @@ public class GeofenceEngine {
                 .setInitialTrigger(defineInitialTrigger())
                 .build();
 
-        mGeofencingClient.addGeofences(
-                        geofencingRequest, mPendingIntent)
-                .addOnSuccessListener(successCallback::apply)
-                .addOnFailureListener(failureCallback::apply);
+        mGeofencingClient
+                .addGeofences(geofencingRequest, mPendingIntent)
+                .addOnSuccessListener(result -> {
+                    Log.d(TAG, "addGeofences: success (" + geofences.size() + " geofence(s))");
+                    successCallback.apply(result);
+                })
+                .addOnFailureListener(e -> {
+                    if (e instanceof ApiException) {
+                        int code = ((ApiException) e).getStatusCode();
+                        String msg = GeofenceStatusCodes.getStatusCodeString(code) + " (" + code + ")";
+                        Log.e(TAG, "addGeofences: failed with " + msg, e);
+                    } else {
+                        Log.e(TAG, "addGeofences: failed", e);
+                    }
+                    failureCallback.apply(e);
+                });
     }
 
-    public void removeGeofences(List<String> geofenceIds, Function<? super Object, ? super Object> successCallback,
-                                Function<? super Object, ? super Object> failureCallback) {
-        mGeofencingClient.removeGeofences(geofenceIds)
-                .addOnSuccessListener(successCallback::apply)
-                .addOnFailureListener(failureCallback::apply);
+    public void removeGeofences(
+            List<String> geofenceIds,
+            Function<? super Object, ? super Object> successCallback,
+            Function<? super Object, ? super Object> failureCallback
+    ) {
+        mGeofencingClient
+                .removeGeofences(geofenceIds)
+                .addOnSuccessListener(result -> {
+                    Log.d(TAG, "removeGeofences: success (" + geofenceIds.size() + " id(s))");
+                    successCallback.apply(result);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "removeGeofences: failed", e);
+                    failureCallback.apply(e);
+                });
     }
 
     private int defineTransitionTypes(Geofence geofence) {
