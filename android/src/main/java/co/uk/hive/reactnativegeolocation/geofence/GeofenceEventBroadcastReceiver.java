@@ -104,6 +104,9 @@ public class GeofenceEventBroadcastReceiver extends BroadcastReceiver {
     private void runHeadlessJsTask(Context context, PersistableBundle bundle) {
         GeofenceHeadlessJsTaskService.start(context, bundle);
         // ensure CPU stays awake while JS task spins up
+        // IMPORTANT: If starting HeadlessJsTaskService from BroadcastReceiver,
+        // acquireWakeLockNow MUST be called before onReceive() returns,
+        // otherwise the CPU may sleep before the service starts.
         HeadlessJsTaskService.acquireWakeLockNow(context);
     }
 
