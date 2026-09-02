@@ -4,8 +4,8 @@ import android.app.job.JobParameters;
 import android.app.job.JobService;
 import android.os.Bundle;
 import com.facebook.react.ReactApplication;
-import com.facebook.react.ReactInstanceManager;
-import com.facebook.react.ReactNativeHost;
+import com.facebook.react.ReactHost;
+import com.facebook.react.ReactInstanceEventListener;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.jstasks.HeadlessJsTaskConfig;
@@ -64,21 +64,18 @@ public abstract class JobHeadlessJsTaskService extends JobService implements Hea
      */
     protected void startTask(final HeadlessJsTaskConfig taskConfig) {
         UiThreadUtil.assertOnUiThread();
-        final ReactInstanceManager reactInstanceManager =
-                getReactNativeHost().getReactInstanceManager();
-        ReactContext reactContext = reactInstanceManager.getCurrentReactContext();
+
+        final ReactHost reactHost = getReactHost();
+        ReactContext reactContext = reactHost.getCurrentReactContext();
         if (reactContext == null) {
-            reactInstanceManager
-                    .addReactInstanceEventListener(new ReactInstanceManager.ReactInstanceEventListener() {
-                        @Override
-                        public void onReactContextInitialized(ReactContext reactContext) {
-                            invokeStartTask(reactContext, taskConfig);
-                            reactInstanceManager.removeReactInstanceEventListener(this);
-                        }
-                    });
-            if (!reactInstanceManager.hasStartedCreatingInitialContext()) {
-                reactInstanceManager.createReactContextInBackground();
-            }
+            reactHost.addReactInstanceEventListener(new ReactInstanceEventListener() {
+                @Override
+                public void onReactContextInitialized(ReactContext reactContext) {
+                    invokeStartTask(reactContext, taskConfig);
+                    reactHost.removeReactInstanceEventListener(this);
+                }
+            });
+            reactHost.start();
         } else {
             invokeStartTask(reactContext, taskConfig);
         }
@@ -100,15 +97,16 @@ public abstract class JobHeadlessJsTaskService extends JobService implements Hea
     public void onDestroy() {
         super.onDestroy();
 
-        if (getReactNativeHost().hasInstance()) {
-            ReactInstanceManager reactInstanceManager = getReactNativeHost().getReactInstanceManager();
-            ReactContext reactContext = reactInstanceManager.getCurrentReactContext();
-            if (reactContext != null) {
-                HeadlessJsTaskContext headlessJsTaskContext =
-                        HeadlessJsTaskContext.getInstance(reactContext);
-                headlessJsTaskContext.removeTaskEventListener(this);
-            }
+        ReactContext reactContext = getCurrentReactContext();
+        if (reactContext != null) {
+            HeadlessJsTaskContext headlessJsTaskContext =
+                    HeadlessJsTaskContext.getInstance(reactContext);
+            headlessJsTaskContext.removeTaskEventListener(this);
         }
+    }
+
+    private @Nullable ReactContext getCurrentReactContext() {
+        return getReactHost().getCurrentReactContext();
     }
 
     @Override
@@ -123,13 +121,9 @@ public abstract class JobHeadlessJsTaskService extends JobService implements Hea
     }
 
     /**
-     * Get the {@link ReactNativeHost} used by this app. By default, assumes {@link #getApplication()}
-     * is an instance of {@link ReactApplication} and calls
-     * {@link ReactApplication#getReactNativeHost()}. Override this method if your application class
-     * does not implement {@code ReactApplication} or you simply have a different mechanism for
-     * storing a {@code ReactNativeHost}, e.g. as a static field somewhere.
+     * Get the ReactHost used by apps running React Native's New Architecture.
      */
-    protected ReactNativeHost getReactNativeHost() {
-        return ((ReactApplication) getApplication()).getReactNativeHost();
+    protected ReactHost getReactHost() {
+        return ((ReactApplication) getApplication()).getReactHost();
     }
 }

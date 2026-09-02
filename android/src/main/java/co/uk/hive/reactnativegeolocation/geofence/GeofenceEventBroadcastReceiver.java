@@ -11,8 +11,7 @@ import co.uk.hive.reactnativegeolocation.RNMapper;
 import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
 import com.facebook.react.ReactApplication;
-import com.facebook.react.ReactInstanceManager;
-import com.facebook.react.ReactNativeHost;
+import com.facebook.react.ReactHost;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.HeadlessJsTaskService;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
@@ -119,9 +118,9 @@ public class GeofenceEventBroadcastReceiver extends BroadcastReceiver {
                 return null;
             }
 
-            ReactNativeHost host = ((ReactApplication) appContext).getReactNativeHost();
-            ReactInstanceManager rim = host.getReactInstanceManager();
-            return rim.getCurrentReactContext();
+            ReactApplication application = (ReactApplication) appContext;
+            ReactHost reactHost = application.getReactHost();
+            return reactHost.getCurrentReactContext();
         } catch (Exception e) {
             Log.w(TAG, "Failed to get ReactContext", e);
             return null;
